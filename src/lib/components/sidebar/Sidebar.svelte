@@ -4,8 +4,11 @@
   import TagList from './TagList.svelte';
   import { isVaultOpen, openVault } from '$lib/stores/vault';
   import { open } from '@tauri-apps/plugin-dialog';
+  import { page } from '$app/stores';
   
   let activeTab: 'files' | 'search' | 'tags' = 'files';
+  
+  $: currentPath = $page.url.pathname;
   
   async function handleOpenVault() {
     const selected = await open({
@@ -72,4 +75,30 @@
       </button>
     </div>
   {/if}
+  
+  <!-- Navigation -->
+  <div class="border-t border-neutral-800 p-2 flex gap-1">
+    <a
+      href="/"
+      class="flex-1 px-3 py-2 text-sm text-center rounded transition-colors
+        {currentPath === '/' ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}"
+    >
+      Editor
+    </a>
+    <a
+      href="/graph"
+      class="flex-1 px-3 py-2 text-sm text-center rounded transition-colors
+        {currentPath === '/graph' ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}"
+    >
+      Graph
+    </a>
+    <a
+      href="/settings"
+      class="px-3 py-2 text-sm text-center rounded transition-colors
+        {currentPath === '/settings' ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}"
+      title="Settings"
+    >
+      *
+    </a>
+  </div>
 </aside>
