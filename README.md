@@ -35,9 +35,9 @@ Drag `chronicle.app` to your Applications folder to install.
 
 Releases will be available at:
 
-- [macOS (.dmg)](https://github.com/katieblackabee/chronicle/releases)
-- [Windows (.msi)](https://github.com/katieblackabee/chronicle/releases)
-- [Linux (.AppImage)](https://github.com/katieblackabee/chronicle/releases)
+- [macOS (.dmg)](https://github.com/sudokatie/chronicle/releases)
+- [Windows (.msi)](https://github.com/sudokatie/chronicle/releases)
+- [Linux (.AppImage)](https://github.com/sudokatie/chronicle/releases)
 
 ### Build from Source
 
@@ -48,7 +48,7 @@ Requirements:
 
 ```bash
 # Clone the repository
-git clone https://github.com/katieblackabee/chronicle.git
+git clone https://github.com/sudokatie/chronicle.git
 cd chronicle
 
 # Install dependencies
