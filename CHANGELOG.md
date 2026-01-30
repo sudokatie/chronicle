@@ -5,6 +5,25 @@ All notable changes to Chronicle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-01-30
+
+### Added
+
+- **Quick Open** (`Cmd+O`): Fuzzy finder for notes with instant search
+- **Command Palette** (`Cmd+P`): Access all commands from one place
+- **Editor Formatting**: Bold (`Cmd+B`), Italic (`Cmd+I`), Wiki link (`Cmd+K`)
+- **Heading Shortcuts**: Increase (`Cmd+]`) and decrease (`Cmd+[`) heading levels
+- **Settings Shortcut** (`Cmd+,`): Quick access to settings
+- **Note Metadata Panel**: Shows created date, modified date, word count, tags
+- **Graph Tag Filter**: Filter the knowledge graph by tag
+- **Editor Preferences**: Font size, line height, word wrap settings
+- **CONTRIBUTING.md**: Guidelines for contributors
+
+### Fixed
+
+- Backlinks panel now shows display text context
+- README now accurately documents all shortcuts
+
 ## [0.1.0] - 2026-01-30
 
 ### Added
@@ -33,8 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planned
 
 - Light theme option
-- Editor preferences (font size, line height)
-- Quick open modal (fuzzy finder)
 - Automatic link completion on [[
 - Note templates
 - Export to PDF/HTML

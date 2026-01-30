@@ -88,12 +88,25 @@ You can also use [[note-name|display text]].
 
 ### Keyboard Shortcuts
 
+**Global**
 | Shortcut | Action |
 |----------|--------|
 | `Cmd/Ctrl + N` | New note |
+| `Cmd/Ctrl + O` | Quick open (fuzzy finder) |
+| `Cmd/Ctrl + P` | Command palette |
 | `Cmd/Ctrl + S` | Save note |
 | `Cmd/Ctrl + G` | Toggle graph view |
 | `Cmd/Ctrl + Shift + F` | Focus search |
+| `Cmd/Ctrl + ,` | Open settings |
+
+**Editor**
+| Shortcut | Action |
+|----------|--------|
+| `Cmd/Ctrl + B` | Bold |
+| `Cmd/Ctrl + I` | Italic |
+| `Cmd/Ctrl + K` | Insert wiki link |
+| `Cmd/Ctrl + ]` | Increase heading level |
+| `Cmd/Ctrl + [` | Decrease heading level |
 | `Cmd/Ctrl + Click` | Follow wiki-link |
 
 ### Graph View

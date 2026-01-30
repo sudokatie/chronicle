@@ -34,10 +34,10 @@ export interface SearchResult {
 }
 
 export interface Backlink {
-  source_id: number;
   source_path: string;
   source_title: string;
   line_number: number | null;
+  display_text: string | null;
 }
 
 export interface GraphNode {
