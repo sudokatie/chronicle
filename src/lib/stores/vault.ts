@@ -1,0 +1,79 @@
+/**
+ * Vault store - manages vault state
+ */
+import { writable, derived, get } from 'svelte/store';
+import * as api from '$lib/api/tauri';
+import type { VaultInfo, NoteMeta } from '$lib/api/tauri';
+
+// Vault state
+export const vaultInfo = writable<VaultInfo | null>(null);
+export const notes = writable<NoteMeta[]>([]);
+export const isLoading = writable(false);
+export const error = writable<string | null>(null);
+
+// Derived stores
+export const isVaultOpen = derived(vaultInfo, ($vault) => $vault?.is_open ?? false);
+export const noteCount = derived(notes, ($notes) => $notes.length);
+
+// Actions
+
+export async function openVault(path: string): Promise<void> {
+  isLoading.set(true);
+  error.set(null);
+  
+  try {
+    const info = await api.openVault(path);
+    vaultInfo.set(info);
+    
+    // Load notes
+    const noteList = await api.listNotes();
+    notes.set(noteList);
+  } catch (e) {
+    error.set(e instanceof Error ? e.message : String(e));
+    throw e;
+  } finally {
+    isLoading.set(false);
+  }
+}
+
+export async function closeVault(): Promise<void> {
+  await api.closeVault();
+  vaultInfo.set(null);
+  notes.set([]);
+}
+
+export async function refreshNotes(): Promise<void> {
+  const vault = get(vaultInfo);
+  if (!vault?.is_open) return;
+  
+  const noteList = await api.listNotes();
+  notes.set(noteList);
+}
+
+// Initialize vault event listener
+let unlistenFn: (() => void) | null = null;
+
+export async function initVaultEvents(): Promise<void> {
+  if (unlistenFn) return;
+  
+  unlistenFn = await api.onVaultEvent((event) => {
+    switch (event.type) {
+      case 'index_complete':
+        refreshNotes();
+        break;
+      case 'note_created':
+      case 'note_modified':
+      case 'note_deleted':
+      case 'note_renamed':
+        refreshNotes();
+        break;
+    }
+  });
+}
+
+export function cleanupVaultEvents(): void {
+  if (unlistenFn) {
+    unlistenFn();
+    unlistenFn = null;
+  }
+}
