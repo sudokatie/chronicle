@@ -22,9 +22,18 @@ Personal knowledge graph that grows as you write. Your second brain, visualized.
 
 ## Installation
 
-### Download
+### macOS
 
-Download the latest release for your platform:
+The built application is available at:
+```
+src-tauri/target/release/bundle/macos/chronicle.app
+```
+
+Drag `chronicle.app` to your Applications folder to install.
+
+### Download (when available)
+
+Releases will be available at:
 
 - [macOS (.dmg)](https://github.com/katieblackabee/chronicle/releases)
 - [Windows (.msi)](https://github.com/katieblackabee/chronicle/releases)
