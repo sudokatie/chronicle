@@ -16,10 +16,10 @@ pub async fn list_notes(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<Vec<db_notes::NoteMeta>, ChronicleError> {
     let app_state = state.lock().expect("Failed to lock state");
-    
+
     let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
     let conn = db.conn();
-    
+
     let notes = db_notes::list_notes(&conn)?;
     Ok(notes)
 }
@@ -31,19 +31,22 @@ pub async fn get_note(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<Note, ChronicleError> {
     let app_state = state.lock().expect("Failed to lock state");
-    
-    let vault_path = app_state.vault_path.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
+
+    let vault_path = app_state
+        .vault_path
+        .as_ref()
+        .ok_or(ChronicleError::NoVaultOpen)?;
     let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
-    
+
     let full_path = vault_path.join(&path);
     let content = fs::read_to_string(&full_path)?;
-    
+
     let conn = db.conn();
     let meta = db_notes::get_note_by_path(&conn, &path)?
         .ok_or_else(|| ChronicleError::NoteNotFound(path.clone()))?;
-    
+
     let tags = get_note_tags(&conn, meta.id)?;
-    
+
     Ok(Note {
         path: meta.path,
         title: meta.title,
@@ -63,30 +66,33 @@ pub async fn create_note(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<db_notes::NoteMeta, ChronicleError> {
     let app_state = state.lock().expect("Failed to lock state");
-    
-    let vault_path = app_state.vault_path.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
+
+    let vault_path = app_state
+        .vault_path
+        .as_ref()
+        .ok_or(ChronicleError::NoVaultOpen)?;
     let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
-    
+
     // Generate filename from title
     let filename = sanitize_filename(&title) + ".md";
     let full_path = vault_path.join(&filename);
-    
+
     if full_path.exists() {
         return Err(ChronicleError::NoteExists(filename));
     }
-    
+
     // Create content with title heading
     let note_content = content.unwrap_or_else(|| format!("# {}\n\n", title));
     fs::write(&full_path, &note_content)?;
-    
+
     // Index the new note
     let indexer = Indexer::new(vault_path.clone())?;
     indexer.index_file(db, &full_path)?;
-    
+
     let conn = db.conn();
     let meta = db_notes::get_note_by_path(&conn, &filename)?
-        .ok_or_else(|| ChronicleError::NoteNotFound(filename))?;
-    
+        .ok_or(ChronicleError::NoteNotFound(filename))?;
+
     Ok(meta)
 }
 
@@ -98,25 +104,28 @@ pub async fn save_note(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<db_notes::NoteMeta, ChronicleError> {
     let app_state = state.lock().expect("Failed to lock state");
-    
-    let vault_path = app_state.vault_path.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
+
+    let vault_path = app_state
+        .vault_path
+        .as_ref()
+        .ok_or(ChronicleError::NoVaultOpen)?;
     let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
-    
+
     let full_path = vault_path.join(&path);
     if !full_path.exists() {
         return Err(ChronicleError::NoteNotFound(path));
     }
-    
+
     fs::write(&full_path, &content)?;
-    
+
     // Re-index the note
     let indexer = Indexer::new(vault_path.clone())?;
     indexer.index_file(db, &full_path)?;
-    
+
     let conn = db.conn();
     let meta = db_notes::get_note_by_path(&conn, &path)?
-        .ok_or_else(|| ChronicleError::NoteNotFound(path))?;
-    
+        .ok_or(ChronicleError::NoteNotFound(path))?;
+
     Ok(meta)
 }
 
@@ -127,21 +136,24 @@ pub async fn delete_note(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<(), ChronicleError> {
     let app_state = state.lock().expect("Failed to lock state");
-    
-    let vault_path = app_state.vault_path.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
+
+    let vault_path = app_state
+        .vault_path
+        .as_ref()
+        .ok_or(ChronicleError::NoVaultOpen)?;
     let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
-    
+
     let full_path = vault_path.join(&path);
-    
+
     // Remove from index first
     let indexer = Indexer::new(vault_path.clone())?;
     indexer.remove_file(db, &full_path)?;
-    
+
     // Delete file
     if full_path.exists() {
         fs::remove_file(&full_path)?;
     }
-    
+
     Ok(())
 }
 
@@ -153,31 +165,34 @@ pub async fn rename_note(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<db_notes::NoteMeta, ChronicleError> {
     let app_state = state.lock().expect("Failed to lock state");
-    
-    let vault_path = app_state.vault_path.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
+
+    let vault_path = app_state
+        .vault_path
+        .as_ref()
+        .ok_or(ChronicleError::NoVaultOpen)?;
     let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
-    
+
     let old_full = vault_path.join(&old_path);
     let new_full = vault_path.join(&new_path);
-    
+
     if !old_full.exists() {
         return Err(ChronicleError::NoteNotFound(old_path));
     }
-    
+
     if new_full.exists() {
         return Err(ChronicleError::NoteExists(new_path));
     }
-    
+
     // Rename file
     fs::rename(&old_full, &new_full)?;
-    
+
     // Update index
     let conn = db.conn();
     db_notes::rename_note(&conn, &old_path, &new_path)?;
-    
+
     let meta = db_notes::get_note_by_path(&conn, &new_path)?
-        .ok_or_else(|| ChronicleError::NoteNotFound(new_path))?;
-    
+        .ok_or(ChronicleError::NoteNotFound(new_path))?;
+
     Ok(meta)
 }
 

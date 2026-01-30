@@ -13,32 +13,32 @@ impl Database {
     /// Open or create database at path
     pub fn open(path: &Path) -> Result<Self> {
         let conn = Connection::open(path)?;
-        
+
         // Enable foreign keys
         conn.execute_batch("PRAGMA foreign_keys = ON;")?;
-        
+
         // Use WAL mode for better concurrency
         conn.execute_batch("PRAGMA journal_mode = WAL;")?;
-        
+
         // Initialize schema
         init_schema(&conn)?;
-        
+
         Ok(Self {
             conn: Arc::new(Mutex::new(conn)),
         })
     }
-    
+
     /// Open in-memory database (for testing)
     pub fn open_memory() -> Result<Self> {
         let conn = Connection::open_in_memory()?;
         conn.execute_batch("PRAGMA foreign_keys = ON;")?;
         init_schema(&conn)?;
-        
+
         Ok(Self {
             conn: Arc::new(Mutex::new(conn)),
         })
     }
-    
+
     /// Get connection for operations
     pub fn conn(&self) -> std::sync::MutexGuard<'_, Connection> {
         self.conn.lock().expect("Database mutex poisoned")
@@ -109,12 +109,12 @@ CREATE INDEX IF NOT EXISTS idx_notes_path ON notes(path);
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_init_db() {
         let db = Database::open_memory().expect("Failed to create database");
         let conn = db.conn();
-        
+
         // Verify tables exist
         let count: i32 = conn
             .query_row(
@@ -123,19 +123,19 @@ mod tests {
                 |row| row.get(0),
             )
             .expect("Failed to query");
-        
+
         assert_eq!(count, 1);
     }
-    
+
     #[test]
     fn test_foreign_keys_enabled() {
         let db = Database::open_memory().expect("Failed to create database");
         let conn = db.conn();
-        
+
         let fk_enabled: i32 = conn
             .query_row("PRAGMA foreign_keys", [], |row| row.get(0))
             .expect("Failed to query");
-        
+
         assert_eq!(fk_enabled, 1);
     }
 }

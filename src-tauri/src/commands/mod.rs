@@ -1,13 +1,13 @@
 //! Tauri commands for Chronicle
 
-pub mod vault;
+mod graph;
 mod notes;
 mod search;
-mod graph;
 mod tags;
+pub mod vault;
 
-pub use vault::*;
+pub use graph::*;
 pub use notes::*;
 pub use search::*;
-pub use graph::*;
 pub use tags::*;
+pub use vault::*;

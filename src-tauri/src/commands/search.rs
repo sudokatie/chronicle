@@ -17,7 +17,7 @@ pub async fn search_notes(
     let app_state = state.lock().expect("Failed to lock state");
     let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
     let conn = db.conn();
-    
+
     let results = db_search(&conn, &query, limit.unwrap_or(20))?;
     Ok(results)
 }
@@ -31,7 +31,7 @@ pub async fn get_backlinks_cmd(
     let app_state = state.lock().expect("Failed to lock state");
     let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
     let conn = db.conn();
-    
+
     let backlinks = get_backlinks(&conn, &path)?;
     Ok(backlinks)
 }

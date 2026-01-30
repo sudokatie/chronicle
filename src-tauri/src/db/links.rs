@@ -31,16 +31,16 @@ pub fn replace_links(
 ) -> Result<()> {
     // Delete existing links
     conn.execute("DELETE FROM links WHERE source_id = ?1", params![source_id])?;
-    
+
     // Insert new links
     let mut stmt = conn.prepare(
         "INSERT INTO links (source_id, target_path, display_text, line_number) VALUES (?1, ?2, ?3, ?4)"
     )?;
-    
+
     for (target_path, display_text, line_number) in links {
         stmt.execute(params![source_id, target_path, display_text, line_number])?;
     }
-    
+
     // Resolve links to existing notes
     conn.execute(
         r#"
@@ -52,7 +52,7 @@ pub fn replace_links(
         "#,
         params![source_id],
     )?;
-    
+
     Ok(())
 }
 
@@ -66,9 +66,9 @@ pub fn get_backlinks(conn: &Connection, path: &str) -> Result<Vec<Backlink>> {
         WHERE LOWER(l.target_path) = LOWER(?1)
            OR LOWER(l.target_path || '.md') = LOWER(?1)
         ORDER BY n.modified_at DESC
-        "#
+        "#,
     )?;
-    
+
     let rows = stmt.query_map(params![path], |row| {
         Ok(Backlink {
             source_path: row.get(0)?,
@@ -77,7 +77,7 @@ pub fn get_backlinks(conn: &Connection, path: &str) -> Result<Vec<Backlink>> {
             display_text: row.get(3)?,
         })
     })?;
-    
+
     rows.collect()
 }
 
@@ -86,7 +86,7 @@ pub fn get_outlinks(conn: &Connection, source_id: i64) -> Result<Vec<Link>> {
     let mut stmt = conn.prepare(
         "SELECT id, source_id, target_path, target_id, display_text, line_number FROM links WHERE source_id = ?1"
     )?;
-    
+
     let rows = stmt.query_map(params![source_id], |row| {
         Ok(Link {
             id: row.get(0)?,
@@ -97,29 +97,29 @@ pub fn get_outlinks(conn: &Connection, source_id: i64) -> Result<Vec<Link>> {
             line_number: row.get(5)?,
         })
     })?;
-    
+
     rows.collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::db::{schema::Database, notes::upsert_note};
-    
+    use crate::db::{notes::upsert_note, schema::Database};
+
     #[test]
     fn test_replace_links() {
         let db = Database::open_memory().unwrap();
         let conn = db.conn();
-        
+
         let id = upsert_note(&conn, "source.md", "Source", None, None, "x", 0).unwrap();
-        
+
         let links = vec![
             ("target1".to_string(), None, Some(5)),
             ("target2".to_string(), Some("display".to_string()), Some(10)),
         ];
-        
+
         replace_links(&conn, id, &links).unwrap();
-        
+
         let outlinks = get_outlinks(&conn, id).unwrap();
         assert_eq!(outlinks.len(), 2);
     }

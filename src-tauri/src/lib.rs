@@ -1,13 +1,13 @@
 // Chronicle - Personal Knowledge Graph
 
-pub mod db;
-pub mod vault;
 pub mod commands;
-pub mod models;
+pub mod db;
 pub mod error;
+pub mod models;
+pub mod vault;
 
-use std::sync::Mutex;
 use commands::vault::AppState;
+use std::sync::Mutex;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

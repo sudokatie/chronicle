@@ -7,22 +7,22 @@ use thiserror::Error;
 pub enum ChronicleError {
     #[error("Vault not found: {0}")]
     VaultNotFound(String),
-    
+
     #[error("Note not found: {0}")]
     NoteNotFound(String),
-    
+
     #[error("Note already exists: {0}")]
     NoteExists(String),
-    
+
     #[error("Invalid path: {0}")]
     InvalidPath(String),
-    
+
     #[error("No vault is open")]
     NoVaultOpen,
-    
+
     #[error("Database error: {0}")]
     Database(String),
-    
+
     #[error("IO error: {0}")]
     Io(String),
 }
