@@ -93,7 +93,8 @@ You can also use [[note-name|display text]].
 | `Cmd/Ctrl + N` | New note |
 | `Cmd/Ctrl + S` | Save note |
 | `Cmd/Ctrl + G` | Toggle graph view |
-| `Cmd/Ctrl + Shift + F` | Global search |
+| `Cmd/Ctrl + Shift + F` | Focus search |
+| `Cmd/Ctrl + Click` | Follow wiki-link |
 
 ### Graph View
 
