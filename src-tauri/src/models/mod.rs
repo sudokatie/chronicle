@@ -47,7 +47,7 @@ pub struct GraphEdge {
 }
 
 /// Application configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AppConfig {
     #[serde(default)]
     pub vault: VaultConfig,
@@ -112,17 +112,6 @@ fn default_charge_strength() -> i32 { -300 }
 fn default_node_size() -> u32 { 8 }
 fn default_sidebar_width() -> u32 { 250 }
 fn default_panel_width() -> u32 { 250 }
-
-impl Default for AppConfig {
-    fn default() -> Self {
-        Self {
-            vault: VaultConfig::default(),
-            editor: EditorConfig::default(),
-            graph: GraphConfig::default(),
-            ui: UiConfig::default(),
-        }
-    }
-}
 
 impl Default for EditorConfig {
     fn default() -> Self {
