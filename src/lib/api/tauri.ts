@@ -38,6 +38,7 @@ export interface Backlink {
   source_title: string;
   line_number: number | null;
   display_text: string | null;
+  context: string | null;
 }
 
 export interface GraphNode {
@@ -80,6 +81,10 @@ export async function getVaultInfo(): Promise<VaultInfo> {
 
 export async function closeVault(): Promise<void> {
   return invoke('close_vault');
+}
+
+export async function pollVaultEvents(): Promise<void> {
+  return invoke('poll_vault_events');
 }
 
 // Note commands

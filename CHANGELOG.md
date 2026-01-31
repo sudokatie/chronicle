@@ -5,6 +5,22 @@ All notable changes to Chronicle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-01-30
+
+### Added
+
+- **Link Autocomplete**: Type `[[` to trigger autocomplete dropdown with all notes
+- **Backlinks Context**: Backlinks panel now shows surrounding text from source notes
+- **File Watcher Events**: Real-time updates when notes are created/modified/deleted externally
+- **Graph Double-Click**: Double-click a node to open the note (single-click selects)
+- **Graph Escape**: Press Escape in graph view to return to editor
+
+### Fixed
+
+- Link autocomplete now properly wired up using CodeMirror autocompletion
+- File watcher events now emit to frontend via poll_vault_events command
+- Graph view interaction matches spec (double-click to open, Escape to return)
+
 ## [0.1.1] - 2026-01-30
 
 ### Added

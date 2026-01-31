@@ -52,6 +52,7 @@ export async function refreshNotes(): Promise<void> {
 
 // Initialize vault event listener
 let unlistenFn: (() => void) | null = null;
+let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 export async function initVaultEvents(): Promise<void> {
   if (unlistenFn) return;
@@ -69,11 +70,28 @@ export async function initVaultEvents(): Promise<void> {
         break;
     }
   });
+  
+  // Start polling for file system events
+  if (!pollInterval) {
+    pollInterval = setInterval(async () => {
+      if (get(isVaultOpen)) {
+        try {
+          await api.pollVaultEvents();
+        } catch (e) {
+          // Ignore polling errors
+        }
+      }
+    }, 1000); // Poll every second
+  }
 }
 
 export function cleanupVaultEvents(): void {
   if (unlistenFn) {
     unlistenFn();
     unlistenFn = null;
+  }
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
   }
 }

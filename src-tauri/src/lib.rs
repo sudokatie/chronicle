@@ -19,6 +19,7 @@ pub fn run() {
             commands::open_vault,
             commands::get_vault_info,
             commands::close_vault,
+            commands::poll_vault_events,
             commands::list_notes,
             commands::get_note,
             commands::create_note,

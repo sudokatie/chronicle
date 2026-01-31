@@ -21,6 +21,7 @@ pub struct Backlink {
     pub source_title: String,
     pub line_number: Option<i32>,
     pub display_text: Option<String>,
+    pub context: Option<String>, // Surrounding text from the source note
 }
 
 /// Replace all links for a note
@@ -56,7 +57,7 @@ pub fn replace_links(
     Ok(())
 }
 
-/// Get backlinks to a note
+/// Get backlinks to a note (without context - context added at command level)
 pub fn get_backlinks(conn: &Connection, path: &str) -> Result<Vec<Backlink>> {
     let mut stmt = conn.prepare(
         r#"
@@ -75,6 +76,7 @@ pub fn get_backlinks(conn: &Connection, path: &str) -> Result<Vec<Backlink>> {
             source_title: row.get(1)?,
             line_number: row.get(2)?,
             display_text: row.get(3)?,
+            context: None, // Populated at command level with file access
         })
     })?;
 

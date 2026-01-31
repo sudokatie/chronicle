@@ -5,8 +5,12 @@
   import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
   import { markdown } from '@codemirror/lang-markdown';
   import { syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldGutter, indentOnInput } from '@codemirror/language';
+  import { autocompletion, completionKeymap } from '@codemirror/autocomplete';
+  import type { CompletionContext, CompletionResult } from '@codemirror/autocomplete';
   import { oneDark } from '@codemirror/theme-one-dark';
   import { wikiLinkPlugin, wikiLinkTheme } from './wikiLinkPlugin';
+  import { notes } from '$lib/stores/vault';
+  import { get } from 'svelte/store';
   
   export let content: string = '';
   export let readonly: boolean = false;
@@ -19,6 +23,57 @@
   let editorContainer: HTMLDivElement;
   let view: EditorView | null = null;
   const readonlyCompartment = new Compartment();
+  
+  // Wiki-link autocompletion: triggers on [[
+  function wikiLinkCompletion(context: CompletionContext): CompletionResult | null {
+    // Look for [[ before cursor
+    const line = context.state.doc.lineAt(context.pos);
+    const textBefore = line.text.slice(0, context.pos - line.from);
+    
+    // Find last [[ that isn't closed
+    const lastOpen = textBefore.lastIndexOf('[[');
+    if (lastOpen === -1) return null;
+    
+    // Check if there's a ]] after the [[
+    const afterOpen = textBefore.slice(lastOpen + 2);
+    if (afterOpen.includes(']]')) return null;
+    
+    // Get the partial text typed after [[
+    const query = afterOpen.toLowerCase();
+    const from = line.from + lastOpen + 2;
+    
+    // Get notes from store
+    const allNotes = get(notes);
+    
+    // Filter and map to completions
+    const options = allNotes
+      .filter(n => 
+        n.title.toLowerCase().includes(query) ||
+        n.path.toLowerCase().includes(query)
+      )
+      .slice(0, 15)
+      .map(n => ({
+        label: n.title,
+        detail: n.path !== n.title + '.md' ? n.path : undefined,
+        apply: (view: EditorView, completion: any, from: number, to: number) => {
+          // Insert the note title and close with ]]
+          const insert = n.title + ']]';
+          view.dispatch({
+            changes: { from, to, insert },
+            selection: { anchor: from + insert.length },
+          });
+        },
+      }));
+    
+    if (options.length === 0) return null;
+    
+    return {
+      from,
+      to: context.pos,
+      options,
+      filter: false, // We already filtered
+    };
+  }
   
   // Wrap selection with markers (for bold/italic)
   function wrapSelection(view: EditorView, before: string, after: string): boolean {
@@ -124,10 +179,15 @@
       keymap.of([
         ...defaultKeymap,
         ...historyKeymap,
+        ...completionKeymap,
         indentWithTab,
       ]),
       markdown(),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+      autocompletion({
+        override: [wikiLinkCompletion],
+        activateOnTyping: true,
+      }),
       oneDark,
       wikiLinkPlugin((target) => dispatch('linkClick', { target })),
       wikiLinkTheme,

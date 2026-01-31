@@ -129,3 +129,75 @@ pub async fn close_vault(state: State<'_, Mutex<AppState>>) -> Result<(), Chroni
 
     Ok(())
 }
+
+/// Poll for file system events (call periodically from frontend)
+#[tauri::command]
+pub async fn poll_vault_events(
+    state: State<'_, Mutex<AppState>>,
+    app: AppHandle,
+) -> Result<(), ChronicleError> {
+    let app_state = state.lock().expect("Failed to lock state");
+    
+    if let Some(watcher) = &app_state.watcher {
+        let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
+        let vault_path = app_state.vault_path.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
+        
+        let events = watcher.drain_events();
+        let indexer = Indexer::new(vault_path.clone())?;
+        
+        for event in events {
+            match event {
+                crate::vault::VaultEvent::Created(path) => {
+                    // Index the new file
+                    if let Err(e) = indexer.index_file(db, &path) {
+                        eprintln!("Failed to index created file: {}", e);
+                    }
+                    let rel_path = path.strip_prefix(vault_path)
+                        .map(|p| p.to_string_lossy().to_string())
+                        .unwrap_or_else(|_| path.to_string_lossy().to_string());
+                    let _ = app.emit("vault-event", VaultEventPayload::NoteCreated { path: rel_path });
+                }
+                crate::vault::VaultEvent::Modified(path) => {
+                    // Re-index the file
+                    if let Err(e) = indexer.index_file(db, &path) {
+                        eprintln!("Failed to index modified file: {}", e);
+                    }
+                    let rel_path = path.strip_prefix(vault_path)
+                        .map(|p| p.to_string_lossy().to_string())
+                        .unwrap_or_else(|_| path.to_string_lossy().to_string());
+                    let _ = app.emit("vault-event", VaultEventPayload::NoteModified { path: rel_path });
+                }
+                crate::vault::VaultEvent::Deleted(path) => {
+                    // Remove from index
+                    if let Err(e) = indexer.remove_file(db, &path) {
+                        eprintln!("Failed to remove deleted file from index: {}", e);
+                    }
+                    let rel_path = path.strip_prefix(vault_path)
+                        .map(|p| p.to_string_lossy().to_string())
+                        .unwrap_or_else(|_| path.to_string_lossy().to_string());
+                    let _ = app.emit("vault-event", VaultEventPayload::NoteDeleted { path: rel_path });
+                }
+                crate::vault::VaultEvent::Renamed { from, to } => {
+                    // Update index for rename
+                    let old_rel = from.strip_prefix(vault_path)
+                        .map(|p| p.to_string_lossy().to_string())
+                        .unwrap_or_else(|_| from.to_string_lossy().to_string());
+                    let new_rel = to.strip_prefix(vault_path)
+                        .map(|p| p.to_string_lossy().to_string())
+                        .unwrap_or_else(|_| to.to_string_lossy().to_string());
+                    
+                    // Rename in DB
+                    let conn = db.conn();
+                    let _ = crate::db::notes::rename_note(&conn, &old_rel, &new_rel);
+                    
+                    let _ = app.emit("vault-event", VaultEventPayload::NoteRenamed { 
+                        old_path: old_rel, 
+                        new_path: new_rel 
+                    });
+                }
+            }
+        }
+    }
+    
+    Ok(())
+}

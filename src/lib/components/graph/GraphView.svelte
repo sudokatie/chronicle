@@ -8,6 +8,7 @@
   
   const dispatch = createEventDispatcher<{
     nodeClick: { id: string };
+    nodeSelect: { id: string };
   }>();
   
   let container: HTMLDivElement;
@@ -91,8 +92,12 @@
       .attr('fill', '#e5e5e5')
       .attr('font-size', '12px');
     
-    // Click handler
+    // Click handler - single click selects, double click opens
     node.on('click', (event, d) => {
+      dispatch('nodeSelect', { id: d.id });
+    });
+    
+    node.on('dblclick', (event, d) => {
       dispatch('nodeClick', { id: d.id });
     });
     

@@ -69,7 +69,11 @@
               on:click={() => openNote(link.source_path)}
             >
               <div class="font-medium truncate">{link.source_title}</div>
-              {#if link.display_text}
+              {#if link.context}
+                <div class="text-xs text-neutral-500 mt-1 line-clamp-2">
+                  {link.context}
+                </div>
+              {:else if link.display_text}
                 <div class="text-xs text-neutral-500 truncate mt-1">
                   "{link.display_text}"
                 </div>

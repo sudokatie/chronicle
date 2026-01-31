@@ -50,12 +50,24 @@
     filteredData = $graphData;
   }
   
+  function handleNodeSelect(event: CustomEvent<{ id: string }>) {
+    selectNode(event.detail.id);
+  }
+  
   function handleNodeClick(event: CustomEvent<{ id: string }>) {
     selectNode(event.detail.id);
     openNote(event.detail.id);
     goto('/');
   }
+  
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      goto('/');
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <div class="flex-1 flex flex-col h-full">
   <div class="px-4 py-2 border-b border-neutral-800 bg-neutral-900 flex items-center justify-between gap-4">
@@ -88,6 +100,7 @@
       <GraphView 
         data={filteredData} 
         selectedNode={$selectedNode}
+        on:nodeSelect={handleNodeSelect}
         on:nodeClick={handleNodeClick}
       />
     {:else if selectedTag}
