@@ -76,8 +76,8 @@ test.describe('Keyboard Shortcuts', () => {
     await page.keyboard.press('Meta+p');
     await expect(page.getByPlaceholder('Type a command...')).toBeVisible();
     
-    // Press Escape
-    await page.keyboard.press('Escape');
+    // Focus the input and press Escape
+    await page.getByPlaceholder('Type a command...').press('Escape');
     
     // Modal should close
     await expect(page.getByPlaceholder('Type a command...')).not.toBeVisible();
@@ -90,8 +90,8 @@ test.describe('Keyboard Shortcuts', () => {
     // Type search query
     await page.getByPlaceholder('Search notes or create new...').fill('welcome');
     
-    // Should filter to matching notes
-    await expect(page.getByText('Welcome')).toBeVisible();
+    // Should filter to matching notes - the result appears in the list as a button
+    await expect(page.getByRole('button', { name: /Welcome welcome\.md/ })).toBeVisible();
   });
 
   test('quick open navigates with arrow keys', async ({ page }) => {

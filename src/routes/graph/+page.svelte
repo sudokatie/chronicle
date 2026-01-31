@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import GraphView from '$lib/components/graph/GraphView.svelte';
   import { graphData, loadGraphData, selectedNode, selectNode } from '$lib/stores/graph';
   import { openNote } from '$lib/stores/editor';
@@ -12,12 +11,15 @@
   let selectedTag: string | null = null;
   let filteredData: GraphData = { nodes: [], edges: [] };
   
-  onMount(async () => {
-    if ($isVaultOpen) {
-      await loadGraphData();
-      tags = await api.listTags();
-    }
-  });
+  let loaded = false;
+  
+  // React to vault opening - load graph data when vault becomes available
+  $: if ($isVaultOpen && !loaded) {
+    loaded = true;
+    loadGraphData().then(() => {
+      api.listTags().then(t => { tags = t; });
+    });
+  }
   
   // Filter graph data by tag
   async function filterByTag(tag: string | null) {

@@ -61,6 +61,12 @@ test.describe('Graph View', () => {
   test('returns to editor on Escape', async ({ page }) => {
     await page.goto('/graph');
     
+    // Wait for graph to load - check for node count
+    await expect(page.getByText(/\d+ notes/)).toBeVisible();
+    
+    // Click somewhere to ensure focus is on the page
+    await page.locator('body').click();
+    
     // Press Escape
     await page.keyboard.press('Escape');
     
@@ -70,6 +76,9 @@ test.describe('Graph View', () => {
 
   test('shows SVG graph canvas', async ({ page }) => {
     await page.goto('/graph');
+    
+    // Wait for graph to load first
+    await expect(page.getByText('3 notes')).toBeVisible();
     
     // D3 renders to SVG
     await expect(page.locator('svg')).toBeVisible();

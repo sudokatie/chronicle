@@ -25,38 +25,40 @@ test.describe('Notes - Create and Edit', () => {
     // Editor should show the note content
     await expect(page.locator('.cm-editor')).toBeVisible();
     
-    // Backlinks panel should be visible
-    await expect(page.getByText('Backlinks')).toBeVisible();
+    // Backlinks panel heading should be visible
+    await expect(page.getByRole('heading', { name: 'Backlinks' })).toBeVisible();
   });
 
   test('shows note metadata in panel', async ({ page }) => {
     // Open a note
     await page.getByRole('button', { name: 'Welcome' }).click();
     
-    // Should show metadata
-    await expect(page.getByText('Note Info')).toBeVisible();
+    // Should show metadata - use heading for Note Info
+    await expect(page.getByRole('heading', { name: 'Note Info' })).toBeVisible();
     await expect(page.getByText('Created')).toBeVisible();
     await expect(page.getByText('Modified')).toBeVisible();
     await expect(page.getByText('Word Count')).toBeVisible();
-    await expect(page.getByText('Tags')).toBeVisible();
+    // Tags label is in the metadata panel (use term/definition structure)
+    await expect(page.locator('dt:has-text("Tags")')).toBeVisible();
   });
 
   test('shows tags on note', async ({ page }) => {
     // Open a note with tags
     await page.getByRole('button', { name: 'Welcome' }).click();
     
-    // Should show the tags
-    await expect(page.getByText('test')).toBeVisible();
-    await expect(page.getByText('welcome')).toBeVisible();
+    // Should show the tags - they're in spans with 'x' buttons
+    await expect(page.locator('span:has-text("test"):has(button)')).toBeVisible();
+    await expect(page.locator('span:has-text("welcome"):has(button)')).toBeVisible();
   });
 
   test('shows backlinks for linked note', async ({ page }) => {
     // Open the link target note
     await page.getByRole('button', { name: 'Link Target' }).click();
     
-    // Should show backlink from Welcome
-    await expect(page.getByText('Backlinks')).toBeVisible();
-    await expect(page.getByText('Welcome')).toBeVisible();
+    // Should show backlink from Welcome - look in the backlinks panel
+    await expect(page.getByRole('heading', { name: 'Backlinks' })).toBeVisible();
+    // The backlink shows as a button with the source note title
+    await expect(page.locator('[class*="backlink"], button:has(.font-medium:has-text("Welcome"))')).toBeVisible();
   });
 
   test('creates a new note via button', async ({ page }) => {

@@ -33,9 +33,9 @@ pub fn replace_links(
     // Delete existing links
     conn.execute("DELETE FROM links WHERE source_id = ?1", params![source_id])?;
 
-    // Insert new links
+    // Insert new links, ignoring duplicates (same target on same line)
     let mut stmt = conn.prepare(
-        "INSERT INTO links (source_id, target_path, display_text, line_number) VALUES (?1, ?2, ?3, ?4)"
+        "INSERT OR IGNORE INTO links (source_id, target_path, display_text, line_number) VALUES (?1, ?2, ?3, ?4)"
     )?;
 
     for (target_path, display_text, line_number) in links {
