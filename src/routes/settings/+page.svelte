@@ -85,12 +85,12 @@
     <div class="bg-neutral-900 rounded-lg p-4">
       {#if $vaultInfo?.is_open}
         <div class="mb-4">
-          <label class="block text-sm text-neutral-400 mb-1">Current Vault</label>
+          <span class="block text-sm text-neutral-400 mb-1">Current Vault</span>
           <div class="text-white font-mono text-sm break-all">{$vaultInfo.path}</div>
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm text-neutral-400 mb-1">Notes</label>
+          <span class="block text-sm text-neutral-400 mb-1">Notes</span>
           <div class="text-white">{$vaultInfo.note_count} notes indexed</div>
         </div>
         
@@ -125,8 +125,9 @@
     
     <div class="bg-neutral-900 rounded-lg p-4 space-y-4">
       <div>
-        <label class="block text-sm text-neutral-400 mb-2">Font Family</label>
+        <label for="font-family" class="block text-sm text-neutral-400 mb-2">Font Family</label>
         <select
+          id="font-family"
           bind:value={fontFamily}
           class="w-full bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white outline-none focus:border-blue-500"
         >
@@ -141,9 +142,10 @@
       </div>
       
       <div>
-        <label class="block text-sm text-neutral-400 mb-2">Font Size</label>
+        <label for="font-size" class="block text-sm text-neutral-400 mb-2">Font Size</label>
         <div class="flex items-center gap-3">
           <input
+            id="font-size"
             type="range"
             min="10"
             max="24"
@@ -155,9 +157,10 @@
       </div>
       
       <div>
-        <label class="block text-sm text-neutral-400 mb-2">Line Height</label>
+        <label for="line-height" class="block text-sm text-neutral-400 mb-2">Line Height</label>
         <div class="flex items-center gap-3">
           <input
+            id="line-height"
             type="range"
             min="1.2"
             max="2.0"
@@ -215,9 +218,10 @@
       </div>
       
       <div>
-        <label class="block text-sm text-neutral-400 mb-2">Link Distance</label>
+        <label for="link-distance" class="block text-sm text-neutral-400 mb-2">Link Distance</label>
         <div class="flex items-center gap-3">
           <input
+            id="link-distance"
             type="range"
             min="50"
             max="200"
@@ -229,9 +233,10 @@
       </div>
       
       <div>
-        <label class="block text-sm text-neutral-400 mb-2">Charge Strength</label>
+        <label for="charge-strength" class="block text-sm text-neutral-400 mb-2">Charge Strength</label>
         <div class="flex items-center gap-3">
           <input
+            id="charge-strength"
             type="range"
             min="-500"
             max="-100"
@@ -244,9 +249,10 @@
       </div>
       
       <div>
-        <label class="block text-sm text-neutral-400 mb-2">Node Size</label>
+        <label for="node-size" class="block text-sm text-neutral-400 mb-2">Node Size</label>
         <div class="flex items-center gap-3">
           <input
+            id="node-size"
             type="range"
             min="4"
             max="16"

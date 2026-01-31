@@ -38,3 +38,6 @@ dirs = "5.0"
 [dev-dependencies]
 tempfile = "3.10"
 
+[[bench]]
+name = "performance"
+harness = false
