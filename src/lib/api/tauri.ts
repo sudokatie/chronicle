@@ -62,6 +62,39 @@ export interface TagInfo {
   count: number;
 }
 
+export interface AppConfig {
+  vault: VaultConfig;
+  editor: EditorConfig;
+  graph: GraphConfig;
+  ui: UiConfig;
+}
+
+export interface VaultConfig {
+  path: string | null;
+}
+
+export interface EditorConfig {
+  font_family: string;
+  font_size: number;
+  line_height: number;
+  word_wrap: boolean;
+  vim_mode: boolean;
+}
+
+export interface GraphConfig {
+  physics_enabled: boolean;
+  link_distance: number;
+  charge_strength: number;
+  node_size: number;
+}
+
+export interface UiConfig {
+  sidebar_width: number;
+  panel_width: number;
+  show_backlinks: boolean;
+  show_tags: boolean;
+}
+
 export type VaultEvent =
   | { type: 'note_created'; path: string }
   | { type: 'note_modified'; path: string }
@@ -113,6 +146,10 @@ export async function renameNote(oldPath: string, newPath: string): Promise<Note
   return invoke('rename_note', { oldPath, newPath });
 }
 
+export async function updateNoteTags(path: string, tags: string[]): Promise<NoteMeta> {
+  return invoke('update_note_tags', { path, tags });
+}
+
 // Search commands
 
 export async function searchNotes(query: string, limit?: number): Promise<SearchResult[]> {
@@ -137,6 +174,16 @@ export async function listTags(): Promise<TagInfo[]> {
 
 export async function getNotesByTag(tag: string): Promise<NoteMeta[]> {
   return invoke('get_notes_by_tag', { tag });
+}
+
+// Config commands
+
+export async function getConfig(): Promise<AppConfig> {
+  return invoke('get_config');
+}
+
+export async function saveConfig(config: AppConfig): Promise<void> {
+  return invoke('save_config', { config });
 }
 
 // Event listener

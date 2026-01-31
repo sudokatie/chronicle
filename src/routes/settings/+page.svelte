@@ -1,19 +1,67 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { vaultInfo, closeVault, openVault } from '$lib/stores/vault';
   import { open } from '@tauri-apps/plugin-dialog';
+  import * as api from '$lib/api/tauri';
+  import type { AppConfig } from '$lib/api/tauri';
   
-  // Editor preferences (stored in localStorage for now)
-  let fontSize = parseInt(localStorage.getItem('chronicle-fontSize') || '14');
-  let lineHeight = parseFloat(localStorage.getItem('chronicle-lineHeight') || '1.6');
-  let wordWrap = localStorage.getItem('chronicle-wordWrap') !== 'false';
+  // Config state
+  let config: AppConfig | null = null;
+  let isSaving = false;
   
-  function savePref(key: string, value: string) {
-    localStorage.setItem(`chronicle-${key}`, value);
+  // Editor preferences
+  let fontSize = 14;
+  let lineHeight = 1.6;
+  let wordWrap = true;
+  let fontFamily = 'JetBrains Mono';
+  let vimMode = false;
+  
+  // Graph preferences
+  let physicsEnabled = true;
+  let linkDistance = 100;
+  let chargeStrength = -300;
+  let nodeSize = 8;
+  
+  onMount(async () => {
+    config = await api.getConfig();
+    if (config) {
+      fontSize = config.editor.font_size;
+      lineHeight = config.editor.line_height;
+      wordWrap = config.editor.word_wrap;
+      fontFamily = config.editor.font_family;
+      vimMode = config.editor.vim_mode;
+      physicsEnabled = config.graph.physics_enabled;
+      linkDistance = config.graph.link_distance;
+      chargeStrength = config.graph.charge_strength;
+      nodeSize = config.graph.node_size;
+    }
+  });
+  
+  async function saveSettings() {
+    if (!config) return;
+    
+    isSaving = true;
+    try {
+      config.editor.font_size = fontSize;
+      config.editor.line_height = lineHeight;
+      config.editor.word_wrap = wordWrap;
+      config.editor.font_family = fontFamily;
+      config.editor.vim_mode = vimMode;
+      config.graph.physics_enabled = physicsEnabled;
+      config.graph.link_distance = linkDistance;
+      config.graph.charge_strength = chargeStrength;
+      config.graph.node_size = nodeSize;
+      
+      await api.saveConfig(config);
+    } finally {
+      isSaving = false;
+    }
   }
   
-  $: savePref('fontSize', fontSize.toString());
-  $: savePref('lineHeight', lineHeight.toString());
-  $: savePref('wordWrap', wordWrap.toString());
+  // Auto-save on change
+  $: if (config) {
+    saveSettings();
+  }
   
   async function handleChangeVault() {
     const selected = await open({
@@ -77,6 +125,22 @@
     
     <div class="bg-neutral-900 rounded-lg p-4 space-y-4">
       <div>
+        <label class="block text-sm text-neutral-400 mb-2">Font Family</label>
+        <select
+          bind:value={fontFamily}
+          class="w-full bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white outline-none focus:border-blue-500"
+        >
+          <option value="JetBrains Mono">JetBrains Mono</option>
+          <option value="Fira Code">Fira Code</option>
+          <option value="Source Code Pro">Source Code Pro</option>
+          <option value="Monaco">Monaco</option>
+          <option value="Menlo">Menlo</option>
+          <option value="Consolas">Consolas</option>
+          <option value="monospace">System Monospace</option>
+        </select>
+      </div>
+      
+      <div>
         <label class="block text-sm text-neutral-400 mb-2">Font Size</label>
         <div class="flex items-center gap-3">
           <input
@@ -116,9 +180,82 @@
         </label>
       </div>
       
+      <div>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            bind:checked={vimMode}
+            class="w-4 h-4 accent-blue-500 rounded"
+          />
+          <span class="text-neutral-300">Vim Mode</span>
+        </label>
+        <p class="text-xs text-neutral-500 mt-1 ml-7">Use vim keybindings in the editor</p>
+      </div>
+      
       <p class="text-xs text-neutral-500">
-        Note: Editor preferences require app restart to take effect.
+        Note: Some preferences require app restart to take effect.
       </p>
+    </div>
+  </section>
+  
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">Graph</h2>
+    
+    <div class="bg-neutral-900 rounded-lg p-4 space-y-4">
+      <div>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            bind:checked={physicsEnabled}
+            class="w-4 h-4 accent-blue-500 rounded"
+          />
+          <span class="text-neutral-300">Physics Simulation</span>
+        </label>
+        <p class="text-xs text-neutral-500 mt-1 ml-7">Enable force-directed layout animation</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm text-neutral-400 mb-2">Link Distance</label>
+        <div class="flex items-center gap-3">
+          <input
+            type="range"
+            min="50"
+            max="200"
+            bind:value={linkDistance}
+            class="flex-1 accent-blue-500"
+          />
+          <span class="text-white w-12 text-right">{linkDistance}</span>
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm text-neutral-400 mb-2">Charge Strength</label>
+        <div class="flex items-center gap-3">
+          <input
+            type="range"
+            min="-500"
+            max="-100"
+            bind:value={chargeStrength}
+            class="flex-1 accent-blue-500"
+          />
+          <span class="text-white w-12 text-right">{chargeStrength}</span>
+        </div>
+        <p class="text-xs text-neutral-500 mt-1">More negative = nodes repel more strongly</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm text-neutral-400 mb-2">Node Size</label>
+        <div class="flex items-center gap-3">
+          <input
+            type="range"
+            min="4"
+            max="16"
+            bind:value={nodeSize}
+            class="flex-1 accent-blue-500"
+          />
+          <span class="text-white w-12 text-right">{nodeSize}px</span>
+        </div>
+      </div>
     </div>
   </section>
   

@@ -72,3 +72,17 @@ export function closeNote(): void {
   backlinks.set([]);
   isDirty.set(false);
 }
+
+export async function reloadCurrentNote(): Promise<void> {
+  const current = get(currentNote);
+  if (!current) return;
+  
+  const note = await api.getNote(current.path);
+  currentNote.set(note);
+  
+  // Reload backlinks
+  const links = await api.getBacklinks(current.path);
+  backlinks.set(links);
+  
+  await refreshNotes();
+}

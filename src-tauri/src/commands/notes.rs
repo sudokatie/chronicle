@@ -211,3 +211,43 @@ fn sanitize_filename(name: &str) -> String {
         .replace(' ', "-")
         .to_lowercase()
 }
+
+/// Update tags for a note
+#[tauri::command]
+pub async fn update_note_tags(
+    path: String,
+    tags: Vec<String>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<db_notes::NoteMeta, ChronicleError> {
+    let app_state = state.lock().expect("Failed to lock state");
+
+    let vault_path = app_state
+        .vault_path
+        .as_ref()
+        .ok_or(ChronicleError::NoVaultOpen)?;
+    let db = app_state.db.as_ref().ok_or(ChronicleError::NoVaultOpen)?;
+
+    let full_path = vault_path.join(&path);
+    if !full_path.exists() {
+        return Err(ChronicleError::NoteNotFound(path));
+    }
+
+    // Read current content
+    let content = fs::read_to_string(&full_path)?;
+    
+    // Update tags in content
+    let new_content = crate::vault::update_note_tags(&content, &tags);
+    
+    // Write back
+    fs::write(&full_path, &new_content)?;
+
+    // Re-index the note
+    let indexer = Indexer::new(vault_path.clone())?;
+    indexer.index_file(db, &full_path)?;
+
+    let conn = db.conn();
+    let meta = db_notes::get_note_by_path(&conn, &path)?
+        .ok_or(ChronicleError::NoteNotFound(path))?;
+
+    Ok(meta)
+}

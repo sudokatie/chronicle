@@ -5,6 +5,23 @@ All notable changes to Chronicle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-01-30
+
+### Added
+
+- **Editable Tags**: Click "Edit" in the metadata panel to add/remove tags from notes
+- **TOML Config**: Settings now persist to `~/.config/chronicle/config.toml` instead of localStorage
+- **Font Family**: Choose from JetBrains Mono, Fira Code, Monaco, Menlo, Consolas, or system monospace
+- **Vim Mode**: Optional vim keybindings in the editor (enable in settings)
+- **Graph Physics Settings**: Configure link distance, charge strength, and node size
+- **Graph Toggle**: Enable/disable physics simulation
+
+### Technical
+
+- Added `update_note_tags` command for frontmatter manipulation
+- Added `get_config` and `save_config` commands for TOML persistence
+- Config stored at platform-appropriate location (e.g., `~/.config/chronicle/config.toml` on macOS/Linux)
+
 ## [0.1.2] - 2026-01-30
 
 ### Added

@@ -133,6 +133,40 @@ fn count_words(text: &str) -> usize {
     text.split_whitespace().count()
 }
 
+/// Update tags in a note's content, preserving other frontmatter and body
+pub fn update_note_tags(content: &str, new_tags: &[String]) -> String {
+    let (existing_fm, body_start) = parse_frontmatter(content);
+    let body = &content[body_start..];
+    
+    // Build new frontmatter
+    let mut fm = existing_fm.unwrap_or_default();
+    fm.tags = new_tags.to_vec();
+    
+    // Serialize frontmatter
+    let mut fm_lines = vec!["---".to_string()];
+    
+    if let Some(title) = &fm.title {
+        fm_lines.push(format!("title: {}", title));
+    }
+    if let Some(created) = &fm.created {
+        fm_lines.push(format!("created: {}", created));
+    }
+    if let Some(modified) = &fm.modified {
+        fm_lines.push(format!("modified: {}", modified));
+    }
+    if !fm.tags.is_empty() {
+        fm_lines.push("tags:".to_string());
+        for tag in &fm.tags {
+            fm_lines.push(format!("  - {}", tag));
+        }
+    }
+    
+    fm_lines.push("---".to_string());
+    fm_lines.push(String::new()); // Empty line after frontmatter
+    
+    format!("{}{}", fm_lines.join("\n"), body.trim_start())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
