@@ -5,6 +5,28 @@ All notable changes to Chronicle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-01-31
+
+### Added
+
+- **Tag Filter in File Browser**: Click "filter" next to any tag to filter the file tree to only show notes with that tag. Visual indicator shows active filter.
+- **Vim Mode**: Fully wired up vim keybindings using @replit/codemirror-vim. Toggle in Settings.
+- **Dynamic Editor Styling**: Font family, font size, line height from config now apply to the editor in real-time.
+- **Configurable Panel Widths**: Sidebar and backlinks panel widths can be set in config.toml and apply on load.
+- **Show/Hide Backlinks and Tags**: `show_backlinks` and `show_tags` settings control visibility of those panel sections.
+
+### Fixed
+
+- Editor preferences (font, size, line height, word wrap) now actually apply to CodeMirror instead of being stored but ignored.
+- Vim mode toggle in settings now enables/disables vim keybindings live.
+- Config store properly loads on app startup.
+
+### Technical
+
+- Added `config.ts` store with reactive updates to editor and UI components
+- Added `tagFilter` and `filteredNotePaths` to vault store for tag filtering
+- CodeMirror now uses compartments for live config updates (vim mode, theme)
+
 ## [0.1.3] - 2026-01-30
 
 ### Added

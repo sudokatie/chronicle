@@ -5,6 +5,7 @@
   import CommandPalette from '$lib/components/common/CommandPalette.svelte';
   import { onMount, onDestroy } from 'svelte';
   import { initVaultEvents, cleanupVaultEvents, isVaultOpen } from '$lib/stores/vault';
+  import { loadConfig } from '$lib/stores/config';
   import { goto } from '$app/navigation';
   import { saveCurrentNote, createNote } from '$lib/stores/editor';
   import { get } from 'svelte/store';
@@ -13,6 +14,7 @@
   let commandPaletteVisible = false;
   
   onMount(() => {
+    loadConfig();
     initVaultEvents();
   });
   

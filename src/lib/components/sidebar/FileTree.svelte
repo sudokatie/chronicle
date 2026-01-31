@@ -1,8 +1,13 @@
 <script lang="ts">
-  import { notes, refreshNotes } from '$lib/stores/vault';
+  import { notes, refreshNotes, tagFilter, filteredNotePaths, clearTagFilter } from '$lib/stores/vault';
   import { currentPath, openNote, createNote } from '$lib/stores/editor';
   import * as api from '$lib/api/tauri';
   import type { NoteMeta } from '$lib/api/tauri';
+  
+  // Filter notes by tag if a filter is active
+  $: displayedNotes = $filteredNotePaths
+    ? $notes.filter(n => $filteredNotePaths!.has(n.path))
+    : $notes;
   
   // Context menu state
   let contextMenu: { x: number; y: number; note: NoteMeta } | null = null;
@@ -29,7 +34,7 @@
     return groups;
   }
   
-  $: grouped = groupByFolder($notes);
+  $: grouped = groupByFolder(displayedNotes);
   $: folders = Array.from(grouped.keys()).sort();
   
   async function handleNewNote() {
@@ -95,6 +100,21 @@
 <svelte:window on:click={handleWindowClick} />
 
 <div class="p-2">
+  <!-- Tag Filter Banner -->
+  {#if $tagFilter}
+    <div class="px-3 py-2 mb-2 bg-blue-900/30 border border-blue-800 rounded flex items-center justify-between">
+      <span class="text-sm text-blue-300">
+        Filtered: #{$tagFilter}
+      </span>
+      <button
+        class="text-xs text-blue-400 hover:text-white"
+        on:click={clearTagFilter}
+      >
+        Clear
+      </button>
+    </div>
+  {/if}
+  
   <!-- New Note Button -->
   <button
     class="w-full px-3 py-2 mb-2 text-sm text-left text-neutral-300 hover:bg-neutral-800 rounded flex items-center gap-2"
@@ -129,9 +149,13 @@
     {/each}
   {/each}
   
-  {#if $notes.length === 0}
+  {#if displayedNotes.length === 0}
     <p class="px-3 py-4 text-sm text-neutral-500 text-center">
-      No notes yet. Create one to get started.
+      {#if $tagFilter}
+        No notes with tag #{$tagFilter}.
+      {:else}
+        No notes yet. Create one to get started.
+      {/if}
     </p>
   {/if}
 </div>

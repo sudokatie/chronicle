@@ -1,7 +1,12 @@
 <script lang="ts">
   import { backlinks, currentNote, reloadCurrentNote } from '$lib/stores/editor';
   import { openNote } from '$lib/stores/editor';
+  import { uiConfig } from '$lib/stores/config';
   import * as api from '$lib/api/tauri';
+  
+  $: panelWidth = $uiConfig.panel_width;
+  $: showBacklinks = $uiConfig.show_backlinks;
+  $: showTags = $uiConfig.show_tags;
   
   let isEditingTags = false;
   let tagInput = '';
@@ -58,7 +63,7 @@
   }
 </script>
 
-<div class="w-72 border-l border-neutral-800 bg-neutral-900 overflow-y-auto flex flex-col">
+<div class="border-l border-neutral-800 bg-neutral-900 overflow-y-auto flex flex-col" style="width: {panelWidth}px;">
   <!-- Metadata Section -->
   {#if $currentNote}
     <div class="p-4 border-b border-neutral-800">
@@ -77,6 +82,7 @@
           <dt class="text-neutral-500 text-xs">Word Count</dt>
           <dd class="text-neutral-300">{$currentNote.word_count.toLocaleString()} words</dd>
         </div>
+        {#if showTags}
         <div>
           <dt class="text-neutral-500 text-xs mb-1 flex items-center justify-between">
             <span>Tags</span>
@@ -137,11 +143,13 @@
             {/if}
           </dd>
         </div>
+        {/if}
       </dl>
     </div>
   {/if}
   
   <!-- Backlinks Section -->
+  {#if showBacklinks}
   <div class="p-4 flex-1">
     <h3 class="text-sm font-medium text-neutral-400 mb-3">
       Backlinks
@@ -178,4 +186,5 @@
       </ul>
     {/if}
   </div>
+  {/if}
 </div>

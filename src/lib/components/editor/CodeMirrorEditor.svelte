@@ -8,8 +8,10 @@
   import { autocompletion, completionKeymap } from '@codemirror/autocomplete';
   import type { CompletionContext, CompletionResult } from '@codemirror/autocomplete';
   import { oneDark } from '@codemirror/theme-one-dark';
+  import { vim } from '@replit/codemirror-vim';
   import { wikiLinkPlugin, wikiLinkTheme } from './wikiLinkPlugin';
   import { notes } from '$lib/stores/vault';
+  import { editorConfig } from '$lib/stores/config';
   import { get } from 'svelte/store';
   
   export let content: string = '';
@@ -23,6 +25,11 @@
   let editorContainer: HTMLDivElement;
   let view: EditorView | null = null;
   const readonlyCompartment = new Compartment();
+  const vimCompartment = new Compartment();
+  const themeCompartment = new Compartment();
+  
+  // Get current config values
+  $: currentConfig = $editorConfig;
   
   // Wiki-link autocompletion: triggers on [[
   function wikiLinkCompletion(context: CompletionContext): CompletionResult | null {
@@ -163,6 +170,33 @@
   ]);
   
   function createEditor() {
+    const config = get(editorConfig);
+    
+    // Build dynamic theme based on config
+    function buildTheme(cfg: typeof config) {
+      return EditorView.theme({
+        '&': {
+          height: '100%',
+          fontSize: `${cfg.font_size}px`,
+        },
+        '.cm-scroller': {
+          overflow: 'auto',
+          fontFamily: `"${cfg.font_family}", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`,
+          lineHeight: String(cfg.line_height),
+        },
+        '.cm-content': {
+          padding: '16px',
+        },
+        '.cm-gutters': {
+          backgroundColor: 'transparent',
+          borderRight: 'none',
+        },
+        '.cm-line': {
+          wordBreak: cfg.word_wrap ? 'break-word' : 'normal',
+        },
+      });
+    }
+    
     const extensions = [
       lineNumbers(),
       highlightActiveLineGutter(),
@@ -192,28 +226,14 @@
       wikiLinkPlugin((target) => dispatch('linkClick', { target })),
       wikiLinkTheme,
       readonlyCompartment.of(EditorState.readOnly.of(readonly)),
+      vimCompartment.of(config.vim_mode ? vim() : []),
+      themeCompartment.of(buildTheme(config)),
+      config.word_wrap ? EditorView.lineWrapping : [],
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           const newContent = update.state.doc.toString();
           dispatch('change', { content: newContent });
         }
-      }),
-      EditorView.theme({
-        '&': {
-          height: '100%',
-          fontSize: '14px',
-        },
-        '.cm-scroller': {
-          overflow: 'auto',
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-        },
-        '.cm-content': {
-          padding: '16px',
-        },
-        '.cm-gutters': {
-          backgroundColor: 'transparent',
-          borderRight: 'none',
-        },
       }),
     ];
     
@@ -243,6 +263,13 @@
   $: if (view) {
     view.dispatch({
       effects: readonlyCompartment.reconfigure(EditorState.readOnly.of(readonly)),
+    });
+  }
+  
+  // Update vim mode when config changes
+  $: if (view && currentConfig) {
+    view.dispatch({
+      effects: vimCompartment.reconfigure(currentConfig.vim_mode ? vim() : []),
     });
   }
   

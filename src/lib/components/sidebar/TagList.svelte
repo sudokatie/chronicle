@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   import * as api from '$lib/api/tauri';
   import { openNote } from '$lib/stores/editor';
   import type { TagInfo, NoteMeta } from '$lib/api/tauri';
+  
+  const dispatch = createEventDispatcher<{ tagSelect: { tag: string } }>();
   
   let tags: TagInfo[] = [];
   let selectedTag: string | null = null;
@@ -32,6 +34,10 @@
       loading = false;
     }
   }
+  
+  function filterByTag(tag: string) {
+    dispatch('tagSelect', { tag });
+  }
 </script>
 
 <div class="p-2">
@@ -42,18 +48,27 @@
   {:else}
     {#each tags as tag}
       <div>
-        <button
-          class="w-full px-3 py-1.5 text-sm text-left rounded flex items-center justify-between transition-colors
-            {selectedTag === tag.name 
-              ? 'bg-blue-600 text-white' 
-              : 'text-neutral-300 hover:bg-neutral-800'}"
-          on:click={() => selectTag(tag.name)}
-        >
-          <span>#{tag.name}</span>
-          <span class="text-xs {selectedTag === tag.name ? 'text-blue-200' : 'text-neutral-500'}">
-            {tag.count}
-          </span>
-        </button>
+        <div class="flex items-center gap-1">
+          <button
+            class="flex-1 px-3 py-1.5 text-sm text-left rounded flex items-center justify-between transition-colors
+              {selectedTag === tag.name 
+                ? 'bg-blue-600 text-white' 
+                : 'text-neutral-300 hover:bg-neutral-800'}"
+            on:click={() => selectTag(tag.name)}
+          >
+            <span>#{tag.name}</span>
+            <span class="text-xs {selectedTag === tag.name ? 'text-blue-200' : 'text-neutral-500'}">
+              {tag.count}
+            </span>
+          </button>
+          <button
+            class="px-2 py-1.5 text-xs text-neutral-500 hover:text-blue-400 hover:bg-neutral-800 rounded transition-colors"
+            on:click={() => filterByTag(tag.name)}
+            title="Filter files by this tag"
+          >
+            filter
+          </button>
+        </div>
         
         {#if selectedTag === tag.name}
           <div class="ml-4 mt-1 mb-2 border-l border-neutral-700 pl-2">

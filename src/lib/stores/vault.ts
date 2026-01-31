@@ -11,6 +11,34 @@ export const notes = writable<NoteMeta[]>([]);
 export const isLoading = writable(false);
 export const error = writable<string | null>(null);
 
+// Tag filter for file browser
+export const tagFilter = writable<string | null>(null);
+export const filteredNotePaths = writable<Set<string> | null>(null);
+
+// Set tag filter and load filtered note paths
+export async function setTagFilter(tag: string | null): Promise<void> {
+  tagFilter.set(tag);
+  
+  if (!tag) {
+    filteredNotePaths.set(null);
+    return;
+  }
+  
+  try {
+    const taggedNotes = await api.getNotesByTag(tag);
+    filteredNotePaths.set(new Set(taggedNotes.map(n => n.path)));
+  } catch (e) {
+    console.error('Failed to filter by tag:', e);
+    filteredNotePaths.set(null);
+  }
+}
+
+// Clear tag filter
+export function clearTagFilter(): void {
+  tagFilter.set(null);
+  filteredNotePaths.set(null);
+}
+
 // Derived stores
 export const isVaultOpen = derived(vaultInfo, ($vault) => $vault?.is_open ?? false);
 export const noteCount = derived(notes, ($notes) => $notes.length);

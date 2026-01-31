@@ -2,13 +2,29 @@
   import FileTree from './FileTree.svelte';
   import SearchBar from './SearchBar.svelte';
   import TagList from './TagList.svelte';
-  import { isVaultOpen, openVault } from '$lib/stores/vault';
+  import { isVaultOpen, openVault, tagFilter, setTagFilter, clearTagFilter } from '$lib/stores/vault';
+  import { uiConfig } from '$lib/stores/config';
   import { open } from '@tauri-apps/plugin-dialog';
   import { page } from '$app/stores';
   
   let activeTab: 'files' | 'search' | 'tags' = 'files';
   
   $: currentPath = $page.url.pathname;
+  $: sidebarWidth = $uiConfig.sidebar_width;
+  
+  // When a tag is selected, switch to files tab to show filtered results
+  function handleTagSelect(event: CustomEvent<{ tag: string }>) {
+    setTagFilter(event.detail.tag);
+    activeTab = 'files';
+  }
+  
+  // Clear filter when switching away from files tab with a filter active
+  function switchTab(tab: 'files' | 'search' | 'tags') {
+    if (tab !== 'files' && $tagFilter) {
+      clearTagFilter();
+    }
+    activeTab = tab;
+  }
   
   async function handleOpenVault() {
     const selected = await open({
@@ -22,7 +38,7 @@
   }
 </script>
 
-<aside class="w-64 h-full bg-neutral-900 border-r border-neutral-800 flex flex-col">
+<aside class="h-full bg-neutral-900 border-r border-neutral-800 flex flex-col" style="width: {sidebarWidth}px;">
   <!-- Header -->
   <div class="p-4 border-b border-neutral-800">
     <h1 class="text-lg font-semibold text-white">Chronicle</h1>
@@ -33,19 +49,22 @@
     <div class="flex border-b border-neutral-800">
       <button
         class="flex-1 px-4 py-2 text-sm transition-colors {activeTab === 'files' ? 'text-white bg-neutral-800' : 'text-neutral-400 hover:text-white'}"
-        on:click={() => activeTab = 'files'}
+        on:click={() => switchTab('files')}
       >
         Files
+        {#if $tagFilter}
+          <span class="ml-1 text-xs text-blue-400">#{$tagFilter}</span>
+        {/if}
       </button>
       <button
         class="flex-1 px-4 py-2 text-sm transition-colors {activeTab === 'search' ? 'text-white bg-neutral-800' : 'text-neutral-400 hover:text-white'}"
-        on:click={() => activeTab = 'search'}
+        on:click={() => switchTab('search')}
       >
         Search
       </button>
       <button
         class="flex-1 px-4 py-2 text-sm transition-colors {activeTab === 'tags' ? 'text-white bg-neutral-800' : 'text-neutral-400 hover:text-white'}"
-        on:click={() => activeTab = 'tags'}
+        on:click={() => switchTab('tags')}
       >
         Tags
       </button>
@@ -58,7 +77,7 @@
       {:else if activeTab === 'search'}
         <SearchBar />
       {:else if activeTab === 'tags'}
-        <TagList />
+        <TagList on:tagSelect={handleTagSelect} />
       {/if}
     </div>
   {:else}
