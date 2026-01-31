@@ -67,7 +67,9 @@ CREATE TABLE IF NOT EXISTS notes (
     word_count INTEGER DEFAULT 0
 );
 
--- Full-text search index (external content table)
+-- Full-text search index
+-- Note: Using standalone FTS table (not external content) because notes table
+-- doesn't store content - content lives in files. We manually sync on index.
 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
     title, 
     content,

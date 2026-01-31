@@ -11,6 +11,7 @@ pub struct SearchResult {
     pub title: String,
     pub snippet: String,
     pub rank: f64,
+    pub match_count: i32,
 }
 
 /// Update FTS index for a note
@@ -42,6 +43,9 @@ pub fn search_notes(conn: &Connection, query: &str, limit: usize) -> Result<Vec<
         return Ok(vec![]);
     }
 
+    // Get raw query for match counting (without FTS escaping)
+    let raw_query = query.trim().to_lowercase();
+
     let mut stmt = conn.prepare(
         r#"
         SELECT 
@@ -49,7 +53,8 @@ pub fn search_notes(conn: &Connection, query: &str, limit: usize) -> Result<Vec<
             n.path,
             n.title,
             snippet(notes_fts, 1, '<mark>', '</mark>', '...', 32) as snippet,
-            bm25(notes_fts) as rank
+            bm25(notes_fts) as rank,
+            notes_fts.content as content
         FROM notes_fts
         JOIN notes n ON notes_fts.rowid = n.id
         WHERE notes_fts MATCH ?1
@@ -58,17 +63,32 @@ pub fn search_notes(conn: &Connection, query: &str, limit: usize) -> Result<Vec<
         "#,
     )?;
 
-    let rows = stmt.query_map(params![safe_query, limit as i64], |row| {
-        Ok(SearchResult {
+    let mut results = Vec::new();
+    let mut rows = stmt.query(params![safe_query, limit as i64])?;
+    
+    while let Some(row) = rows.next()? {
+        let content: String = row.get::<_, Option<String>>(5)?.unwrap_or_default();
+        let title: String = row.get(2)?;
+        
+        // Count occurrences in title and content
+        let text = format!("{} {}", title, content).to_lowercase();
+        let match_count = if !raw_query.is_empty() {
+            text.matches(&raw_query).count() as i32
+        } else {
+            0
+        };
+
+        results.push(SearchResult {
             id: row.get(0)?,
             path: row.get(1)?,
-            title: row.get(2)?,
+            title,
             snippet: row.get::<_, Option<String>>(3)?.unwrap_or_default(),
             rank: row.get(4)?,
-        })
-    })?;
+            match_count: match_count.max(1), // At least 1 if it matched
+        });
+    }
 
-    rows.collect()
+    Ok(results)
 }
 
 /// Escape special FTS5 characters in query

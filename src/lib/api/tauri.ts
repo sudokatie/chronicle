@@ -31,6 +31,8 @@ export interface SearchResult {
   path: string;
   title: string;
   snippet: string;
+  rank: number;
+  match_count: number;
 }
 
 export interface Backlink {
