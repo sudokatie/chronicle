@@ -43,6 +43,20 @@ export function clearTagFilter(): void {
 export const isVaultOpen = derived(vaultInfo, ($vault) => $vault?.is_open ?? false);
 export const noteCount = derived(notes, ($notes) => $notes.length);
 
+// Check if a vault was previously open (on app startup)
+export async function checkVaultStatus(): Promise<void> {
+  try {
+    const info = await api.getVaultInfo();
+    if (info.is_open) {
+      vaultInfo.set(info);
+      const noteList = await api.listNotes();
+      notes.set(noteList);
+    }
+  } catch (e) {
+    // No vault open, that's fine
+  }
+}
+
 // Actions
 
 export async function openVault(path: string): Promise<void> {

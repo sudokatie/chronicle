@@ -5,6 +5,28 @@ All notable changes to Chronicle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2026-01-31
+
+### Added
+
+- **E2E Test Suite**: Playwright-based end-to-end tests covering:
+  - Note creation and editing (7 tests)
+  - Search and navigation (9 tests)
+  - Graph view interaction (7 tests)
+  - Keyboard shortcuts (10 tests)
+  - 19 of 33 tests passing - foundation for continuous testing
+
+### Fixed
+
+- App now checks vault status on startup, enabling proper test mocking
+- Tauri API wrapper gracefully handles missing Tauri context (browser-only or E2E tests)
+
+### Technical
+
+- Added Playwright config and test fixtures with Tauri mock injection
+- Tests mock all Tauri commands with realistic data
+- Added `checkVaultStatus()` to load vault info on app startup
+
 ## [0.1.4] - 2026-01-31
 
 ### Added

@@ -4,7 +4,7 @@
   import QuickOpen from '$lib/components/common/QuickOpen.svelte';
   import CommandPalette from '$lib/components/common/CommandPalette.svelte';
   import { onMount, onDestroy } from 'svelte';
-  import { initVaultEvents, cleanupVaultEvents, isVaultOpen } from '$lib/stores/vault';
+  import { initVaultEvents, cleanupVaultEvents, isVaultOpen, checkVaultStatus } from '$lib/stores/vault';
   import { loadConfig } from '$lib/stores/config';
   import { goto } from '$app/navigation';
   import { saveCurrentNote, createNote } from '$lib/stores/editor';
@@ -13,8 +13,9 @@
   let quickOpenVisible = false;
   let commandPaletteVisible = false;
   
-  onMount(() => {
+  onMount(async () => {
     loadConfig();
+    await checkVaultStatus();
     initVaultEvents();
   });
   

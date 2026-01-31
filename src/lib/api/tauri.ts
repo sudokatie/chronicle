@@ -1,8 +1,87 @@
 /**
  * Tauri API wrapper for Chronicle commands
+ * 
+ * Supports three modes:
+ * 1. Real Tauri context (desktop app)
+ * 2. Injected mock (E2E tests via __TAURI_INTERNALS__)
+ * 3. Fallback mock (browser-only development)
  */
-import { invoke } from '@tauri-apps/api/core';
-import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+
+type UnlistenFn = () => void;
+
+// Wrapper that detects context and uses appropriate invoke
+async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
+  // Check for injected mock first (E2E tests inject __TAURI_INTERNALS__)
+  // This must be checked on every call because it might be set after module load
+  if (typeof window !== 'undefined') {
+    // @ts-ignore - mock or real Tauri internals
+    const internals = window.__TAURI_INTERNALS__;
+    if (internals && typeof internals.invoke === 'function') {
+      return internals.invoke(cmd, args);
+    }
+  }
+  
+  // Try dynamic import of real Tauri API (only works in Tauri runtime)
+  try {
+    const { invoke: tauriInvoke } = await import('@tauri-apps/api/core');
+    return tauriInvoke(cmd, args);
+  } catch (e) {
+    // Not in Tauri context - use fallback mock
+    // This is normal in browser-only development or E2E tests without mocks
+    return getMockResponse(cmd, args) as T;
+  }
+}
+
+async function listen<T>(event: string, handler: (event: { payload: T }) => void): Promise<UnlistenFn> {
+  // Check for injected mock
+  if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+    // @ts-ignore - mock or real Tauri internals
+    const internals = window.__TAURI_INTERNALS__ as { event?: { listen?: typeof import('@tauri-apps/api/event').listen } };
+    if (internals.event && typeof internals.event.listen === 'function') {
+      return internals.event.listen(event, handler);
+    }
+  }
+  
+  // Try real Tauri
+  try {
+    const { listen: tauriListen } = await import('@tauri-apps/api/event');
+    return tauriListen(event, handler);
+  } catch {
+    // Mock listener
+    return () => {};
+  }
+}
+
+// Fallback mock responses for browser-only development
+function getMockResponse(cmd: string, _args?: Record<string, unknown>): unknown {
+  switch (cmd) {
+    case 'get_vault_info':
+      return { path: '', note_count: 0, is_open: false };
+    case 'list_notes':
+      return [];
+    case 'list_tags':
+      return [];
+    case 'get_graph_data':
+      return { nodes: [], edges: [] };
+    case 'get_config':
+      return {
+        vault: { path: null },
+        editor: { font_family: 'JetBrains Mono', font_size: 14, line_height: 1.6, word_wrap: true, vim_mode: false },
+        graph: { physics_enabled: true, link_distance: 100, charge_strength: -300, node_size: 8 },
+        ui: { sidebar_width: 250, panel_width: 288, show_backlinks: true, show_tags: true },
+      };
+    case 'search_notes':
+      return [];
+    case 'get_backlinks_cmd':
+      return [];
+    case 'poll_vault_events':
+      return;
+    case 'save_config':
+      return;
+    default:
+      return null;
+  }
+}
 
 // Types matching Rust structs
 
