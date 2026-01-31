@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Graph recreates automatically when settings change.
 - Status bar word count now calculated from current content, not saved metadata.
 
+### Documentation
+
+- README now documents all keyboard shortcuts including `Cmd+E` (toggle preview), `Escape` (exit graph), and complete graph view shortcuts.
+
 ## [0.1.5] - 2026-01-31
 
 ### Added

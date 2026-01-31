@@ -102,12 +102,22 @@ You can also use [[note-name|display text]].
 **Editor**
 | Shortcut | Action |
 |----------|--------|
+| `Cmd/Ctrl + E` | Toggle live preview |
 | `Cmd/Ctrl + B` | Bold |
 | `Cmd/Ctrl + I` | Italic |
 | `Cmd/Ctrl + K` | Insert wiki link |
 | `Cmd/Ctrl + ]` | Increase heading level |
 | `Cmd/Ctrl + [` | Decrease heading level |
 | `Cmd/Ctrl + Click` | Follow wiki-link |
+
+**Graph View**
+| Shortcut | Action |
+|----------|--------|
+| `Scroll` | Zoom in/out |
+| `Drag` | Pan view |
+| `Click` | Select node |
+| `Double-click` | Open note |
+| `Escape` | Return to editor |
 
 ### Graph View
 
