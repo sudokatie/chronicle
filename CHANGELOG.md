@@ -5,6 +5,20 @@ All notable changes to Chronicle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2026-01-31
+
+### Added
+
+- **Live Preview**: Split-pane markdown preview with `Cmd+E` toggle. Renders headings, bold/italic, code blocks, wiki links (clickable), blockquotes, lists, and more.
+- **Live Word Count**: Status bar now shows word and character count updating in real-time as you type.
+- **Modified Indicator**: Visible amber dot in status bar when note has unsaved changes.
+
+### Fixed
+
+- Graph settings (link distance, charge strength, node size, physics toggle) now actually control the graph visualization instead of being ignored.
+- Graph recreates automatically when settings change.
+- Status bar word count now calculated from current content, not saved metadata.
+
 ## [0.1.5] - 2026-01-31
 
 ### Added

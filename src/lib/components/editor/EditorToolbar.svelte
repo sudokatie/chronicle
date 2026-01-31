@@ -6,6 +6,8 @@
   export let onDelete: () => void;
   export let onClose: () => void;
   export let onToggleBacklinks: () => void;
+  export let onTogglePreview: () => void;
+  export let showPreview: boolean = false;
 </script>
 
 <div class="flex items-center justify-between px-4 py-2 border-b border-neutral-800 bg-neutral-900">
@@ -19,6 +21,14 @@
   </div>
   
   <div class="flex items-center gap-2">
+    <button
+      class="px-3 py-1 text-sm transition-colors {showPreview ? 'text-blue-400' : 'text-neutral-400 hover:text-white'}"
+      on:click={onTogglePreview}
+      title="Toggle preview (Cmd+E)"
+    >
+      Preview
+    </button>
+    
     <button
       class="px-3 py-1 text-sm text-neutral-400 hover:text-white transition-colors"
       on:click={onToggleBacklinks}

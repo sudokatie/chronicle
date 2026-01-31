@@ -2,6 +2,7 @@
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import * as d3 from 'd3';
   import type { GraphData, GraphNode, GraphEdge } from '$lib/api/tauri';
+  import { graphConfig } from '$lib/stores/config';
   
   export let data: GraphData;
   export let selectedNode: string | null = null;
@@ -14,6 +15,12 @@
   let container: HTMLDivElement;
   let svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   let simulation: d3.Simulation<SimNode, SimLink> | null = null;
+  
+  // Read graph config
+  $: linkDistance = $graphConfig.link_distance;
+  $: chargeStrength = $graphConfig.charge_strength;
+  $: nodeSize = $graphConfig.node_size;
+  $: physicsEnabled = $graphConfig.physics_enabled;
   
   interface SimNode extends d3.SimulationNodeDatum {
     id: string;
@@ -49,14 +56,20 @@
     const nodes: SimNode[] = data.nodes.map(n => ({ ...n }));
     const links: SimLink[] = data.edges.map(e => ({ ...e }));
     
-    // Create simulation
+    // Create simulation with config values
     simulation = d3.forceSimulation(nodes)
       .force('link', d3.forceLink<SimNode, SimLink>(links)
         .id(d => d.id)
-        .distance(80))
-      .force('charge', d3.forceManyBody().strength(-200))
+        .distance(linkDistance))
+      .force('charge', d3.forceManyBody().strength(chargeStrength))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(30));
+      .force('collision', d3.forceCollide().radius(nodeSize * 3));
+    
+    // If physics disabled, run simulation to completion immediately
+    if (!physicsEnabled) {
+      simulation.stop();
+      for (let i = 0; i < 300; i++) simulation.tick();
+    }
     
     // Create links
     const link = linksGroup.selectAll('line')
@@ -77,9 +90,9 @@
         .on('drag', dragged)
         .on('end', dragended));
     
-    // Node circles
+    // Node circles - size based on config, scaled by word count
     node.append('circle')
-      .attr('r', d => Math.min(10 + Math.sqrt(d.word_count) / 5, 20))
+      .attr('r', d => Math.min(nodeSize + Math.sqrt(d.word_count) / 5, nodeSize * 2.5))
       .attr('fill', d => d.id === selectedNode ? '#3b82f6' : '#6366f1')
       .attr('stroke', '#fff')
       .attr('stroke-width', 1.5);
@@ -163,7 +176,13 @@
     if (simulation) simulation.stop();
   });
   
+  // Recreate graph when data or config changes
   $: if (container && data) {
+    createGraph();
+  }
+  
+  // Recreate when config changes
+  $: if (container && data && (linkDistance || chargeStrength || nodeSize || physicsEnabled !== undefined)) {
     createGraph();
   }
 </script>

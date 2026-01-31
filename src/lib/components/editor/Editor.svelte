@@ -3,10 +3,12 @@
   import EditorToolbar from './EditorToolbar.svelte';
   import BacklinksPanel from './BacklinksPanel.svelte';
   import CodeMirrorEditor from './CodeMirrorEditor.svelte';
+  import MarkdownPreview from './MarkdownPreview.svelte';
   import StatusBar from './StatusBar.svelte';
   import { notes } from '$lib/stores/vault';
   
   let showBacklinks = true;
+  let showPreview = false;
   
   function handleChange(event: CustomEvent<{ content: string }>) {
     updateContent(event.detail.content);
@@ -31,6 +33,11 @@
       event.preventDefault();
       saveCurrentNote();
     }
+    // Cmd/Ctrl + E to toggle preview
+    if ((event.metaKey || event.ctrlKey) && event.key === 'e') {
+      event.preventDefault();
+      showPreview = !showPreview;
+    }
   }
 </script>
 
@@ -46,17 +53,29 @@
       onDelete={deleteCurrentNote}
       onClose={closeNote}
       onToggleBacklinks={() => showBacklinks = !showBacklinks}
+      onTogglePreview={() => showPreview = !showPreview}
+      {showPreview}
     />
     
     <div class="flex-1 flex overflow-hidden">
       <!-- Editor -->
-      <div class="flex-1 overflow-hidden">
+      <div class="flex-1 overflow-hidden {showPreview ? 'w-1/2' : ''}">
         <CodeMirrorEditor
           content={$currentNote.content}
           on:change={handleChange}
           on:linkClick={handleLinkClick}
         />
       </div>
+      
+      <!-- Live Preview -->
+      {#if showPreview}
+        <div class="w-1/2 border-l border-neutral-800 overflow-hidden">
+          <MarkdownPreview 
+            content={$currentNote.content} 
+            on:linkClick={handleLinkClick}
+          />
+        </div>
+      {/if}
       
       <!-- Backlinks Panel -->
       {#if showBacklinks}

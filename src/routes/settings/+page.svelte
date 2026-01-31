@@ -326,6 +326,10 @@
             <td class="py-2 text-white font-mono text-right">Cmd/Ctrl + [</td>
           </tr>
           <tr>
+            <td class="py-2 text-neutral-300">Toggle Preview</td>
+            <td class="py-2 text-white font-mono text-right">Cmd/Ctrl + E</td>
+          </tr>
+          <tr>
             <td class="py-2 text-neutral-300">Follow Link</td>
             <td class="py-2 text-white font-mono text-right">Cmd/Ctrl + Click</td>
           </tr>
@@ -338,7 +342,7 @@
     <h2 class="text-lg font-semibold text-white mb-4">About</h2>
     
     <div class="bg-neutral-900 rounded-lg p-4">
-      <p class="text-neutral-300 mb-2">Chronicle v0.1.0</p>
+      <p class="text-neutral-300 mb-2">Chronicle v0.1.6</p>
       <p class="text-neutral-500 text-sm mb-4">Personal knowledge graph that grows as you write.</p>
       <p class="text-neutral-500 text-sm">
         Built by <a href="https://blackabee.com" class="text-blue-400 hover:underline">Katie</a>
