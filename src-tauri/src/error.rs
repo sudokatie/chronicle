@@ -25,6 +25,12 @@ pub enum ChronicleError {
 
     #[error("IO error: {0}")]
     Io(String),
+
+    #[error("Sync error: {0}")]
+    SyncError(String),
+
+    #[error("Lock failed")]
+    LockFailed,
 }
 
 // Make error serializable for Tauri

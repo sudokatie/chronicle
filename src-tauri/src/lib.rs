@@ -4,6 +4,7 @@ pub mod commands;
 pub mod db;
 pub mod error;
 pub mod models;
+pub mod sync;
 pub mod vault;
 
 use commands::vault::AppState;
@@ -34,6 +35,13 @@ pub fn run() {
             commands::get_notes_by_tag,
             commands::get_config,
             commands::save_config,
+            // Sync commands
+            commands::sync_status,
+            commands::sync_init,
+            commands::sync_push,
+            commands::sync_pull,
+            commands::sync_get_conflict,
+            commands::sync_resolve_conflict,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
