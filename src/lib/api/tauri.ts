@@ -78,6 +78,50 @@ function getMockResponse(cmd: string, _args?: Record<string, unknown>): unknown 
       return;
     case 'save_config':
       return;
+    case 'sync_status':
+      return {
+        initialized: false,
+        remote_url: null,
+        branch: 'main',
+        ahead: 0,
+        behind: 0,
+        conflicts: [],
+        last_sync: null,
+        dirty: false,
+      };
+    case 'sync_init':
+      return {
+        initialized: true,
+        remote_url: null,
+        branch: 'main',
+        ahead: 0,
+        behind: 0,
+        conflicts: [],
+        last_sync: null,
+        dirty: false,
+      };
+    case 'sync_push':
+    case 'sync_pull':
+      return {
+        success: true,
+        files_changed: [],
+        conflicts: [],
+        message: 'Mock sync',
+      };
+    case 'sync_get_conflict':
+      return {
+        path: '',
+        local_content: '',
+        remote_content: '',
+        base_content: null,
+      };
+    case 'sync_resolve_conflict':
+      return {
+        success: true,
+        files_changed: [],
+        conflicts: [],
+        message: 'Conflict resolved',
+      };
     default:
       return null;
   }
@@ -176,6 +220,35 @@ export interface UiConfig {
   show_tags: boolean;
 }
 
+// Sync types
+
+export interface SyncStatus {
+  initialized: boolean;
+  remote_url: string | null;
+  branch: string;
+  ahead: number;
+  behind: number;
+  conflicts: string[];
+  last_sync: string | null;
+  dirty: boolean;
+}
+
+export interface SyncResult {
+  success: boolean;
+  files_changed: string[];
+  conflicts: string[];
+  message: string;
+}
+
+export interface ConflictInfo {
+  path: string;
+  local_content: string;
+  remote_content: string;
+  base_content: string | null;
+}
+
+export type ConflictResolution = 'keep_local' | 'keep_remote' | 'keep_both';
+
 export type VaultEvent =
   | { type: 'note_created'; path: string }
   | { type: 'note_modified'; path: string }
@@ -273,4 +346,30 @@ export function onVaultEvent(callback: (event: VaultEvent) => void): Promise<Unl
   return listen<VaultEvent>('vault-event', (event) => {
     callback(event.payload);
   });
+}
+
+// Sync commands
+
+export async function syncStatus(): Promise<SyncStatus> {
+  return invoke('sync_status');
+}
+
+export async function syncInit(remoteUrl?: string): Promise<SyncStatus> {
+  return invoke('sync_init', { remoteUrl });
+}
+
+export async function syncPush(): Promise<SyncResult> {
+  return invoke('sync_push');
+}
+
+export async function syncPull(): Promise<SyncResult> {
+  return invoke('sync_pull');
+}
+
+export async function syncGetConflict(path: string): Promise<ConflictInfo> {
+  return invoke('sync_get_conflict', { path });
+}
+
+export async function syncResolveConflict(path: string, resolution: ConflictResolution): Promise<SyncResult> {
+  return invoke('sync_resolve_conflict', { path, resolution });
 }
