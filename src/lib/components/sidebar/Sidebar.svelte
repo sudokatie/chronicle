@@ -2,6 +2,7 @@
   import FileTree from './FileTree.svelte';
   import SearchBar from './SearchBar.svelte';
   import TagList from './TagList.svelte';
+  import SyncButton from '$lib/components/sync/SyncButton.svelte';
   import { isVaultOpen, openVault, tagFilter, setTagFilter, clearTagFilter } from '$lib/stores/vault';
   import { uiConfig } from '$lib/stores/config';
   import { open } from '@tauri-apps/plugin-dialog';
@@ -92,6 +93,13 @@
       >
         Open Vault
       </button>
+    </div>
+  {/if}
+  
+  <!-- Sync -->
+  {#if $isVaultOpen}
+    <div class="border-t border-neutral-800 p-2">
+      <SyncButton />
     </div>
   {/if}
   

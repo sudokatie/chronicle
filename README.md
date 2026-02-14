@@ -12,6 +12,7 @@ Personal knowledge graph that grows as you write. Your second brain, visualized.
 - **Backlinks Panel** - See what links to your current note
 - **Knowledge Graph** - D3-powered force-directed visualization
 - **Full-Text Search** - Fast SQLite FTS5 search across all notes
+- **Git Sync** - Sync your vault across devices with git
 - **File-Based Storage** - Plain Markdown files, git-friendly
 - **Keyboard Shortcuts** - Efficient workflow with Cmd/Ctrl shortcuts
 - **Dark Theme** - Easy on the eyes
@@ -118,6 +119,33 @@ You can also use [[note-name|display text]].
 | `Click` | Select node |
 | `Double-click` | Open note |
 | `Escape` | Return to editor |
+
+### Git Sync
+
+Chronicle can sync your vault across devices using git. Click "Set up sync" in the sidebar to get started.
+
+**Initial Setup**
+1. Click "Set up sync" in the sidebar
+2. (Optional) Enter a remote URL for a git repository
+3. Click "Initialize" to create a git repo in your vault
+
+**Syncing**
+- Click the sync button to push local changes and pull remote changes
+- If conflicts occur, a modal will show both versions side-by-side
+- Choose "Keep Local", "Keep Remote", or "Keep Both" to resolve
+
+**Status Indicators**
+| Icon | Meaning |
+|------|---------|
+| ✓ (green) | Synced, no changes |
+| ↑↓ (yellow) | Changes pending |
+| ! (red) | Conflicts need resolution |
+| ○ (gray) | Not yet initialized |
+
+**Behind the Scenes**
+- Chronicle uses libgit2 for git operations
+- Local changes are automatically staged and committed on sync
+- Conflicts are detected during pull and presented for resolution
 
 ### Graph View
 

@@ -3,9 +3,11 @@
   import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
   import QuickOpen from '$lib/components/common/QuickOpen.svelte';
   import CommandPalette from '$lib/components/common/CommandPalette.svelte';
+  import ConflictModal from '$lib/components/sync/ConflictModal.svelte';
   import { onMount, onDestroy } from 'svelte';
   import { initVaultEvents, cleanupVaultEvents, isVaultOpen, checkVaultStatus } from '$lib/stores/vault';
   import { loadConfig } from '$lib/stores/config';
+  import { refreshStatus as refreshSyncStatus } from '$lib/stores/sync';
   import { goto } from '$app/navigation';
   import { saveCurrentNote, createNote } from '$lib/stores/editor';
   import { get } from 'svelte/store';
@@ -17,6 +19,7 @@
     loadConfig();
     await checkVaultStatus();
     initVaultEvents();
+    refreshSyncStatus();
   });
   
   onDestroy(() => {
@@ -111,3 +114,4 @@
   bind:isOpen={commandPaletteVisible} 
   on:quickOpen={handleQuickOpenFromPalette}
 />
+<ConflictModal />
