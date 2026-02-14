@@ -4,6 +4,7 @@
   import { open } from '@tauri-apps/plugin-dialog';
   import * as api from '$lib/api/tauri';
   import type { AppConfig } from '$lib/api/tauri';
+  import PluginManager from '$lib/components/plugins/PluginManager.svelte';
   
   // Config state
   let config: AppConfig | null = null;
@@ -338,11 +339,19 @@
     </div>
   </section>
   
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">Plugins</h2>
+    
+    <div class="bg-neutral-900 rounded-lg p-4">
+      <PluginManager />
+    </div>
+  </section>
+  
   <section>
     <h2 class="text-lg font-semibold text-white mb-4">About</h2>
     
     <div class="bg-neutral-900 rounded-lg p-4">
-      <p class="text-neutral-300 mb-2">Chronicle v0.1.6</p>
+      <p class="text-neutral-300 mb-2">Chronicle v0.1.7</p>
       <p class="text-neutral-500 text-sm mb-4">Personal knowledge graph that grows as you write.</p>
       <p class="text-neutral-500 text-sm">
         Built by <a href="https://blackabee.com" class="text-blue-400 hover:underline">Katie</a>

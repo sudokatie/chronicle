@@ -8,6 +8,7 @@
   import { initVaultEvents, cleanupVaultEvents, isVaultOpen, checkVaultStatus } from '$lib/stores/vault';
   import { loadConfig } from '$lib/stores/config';
   import { refreshStatus as refreshSyncStatus } from '$lib/stores/sync';
+  import { initPlugins } from '$lib/stores/plugins';
   import { goto } from '$app/navigation';
   import { saveCurrentNote, createNote } from '$lib/stores/editor';
   import { get } from 'svelte/store';
@@ -20,6 +21,7 @@
     await checkVaultStatus();
     initVaultEvents();
     refreshSyncStatus();
+    initPlugins();
   });
   
   onDestroy(() => {

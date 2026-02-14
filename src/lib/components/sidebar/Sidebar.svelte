@@ -3,6 +3,7 @@
   import SearchBar from './SearchBar.svelte';
   import TagList from './TagList.svelte';
   import SyncButton from '$lib/components/sync/SyncButton.svelte';
+  import PluginSidebar from '$lib/components/plugins/PluginSidebar.svelte';
   import { isVaultOpen, openVault, tagFilter, setTagFilter, clearTagFilter } from '$lib/stores/vault';
   import { uiConfig } from '$lib/stores/config';
   import { open } from '@tauri-apps/plugin-dialog';
@@ -80,6 +81,9 @@
       {:else if activeTab === 'tags'}
         <TagList on:tagSelect={handleTagSelect} />
       {/if}
+      
+      <!-- Plugin sidebar panels -->
+      <PluginSidebar />
     </div>
   {:else}
     <!-- No vault open -->
