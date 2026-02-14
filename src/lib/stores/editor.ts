@@ -5,6 +5,8 @@ import { writable, derived, get } from 'svelte/store';
 import * as api from '$lib/api/tauri';
 import type { Note, Backlink } from '$lib/api/tauri';
 import { refreshNotes } from './vault';
+import { pluginEvents } from '$lib/plugins';
+import type { PluginNote } from '$lib/plugins';
 
 // Editor state
 export const currentNote = writable<Note | null>(null);
@@ -14,6 +16,17 @@ export const isSaving = writable(false);
 
 // Derived
 export const currentPath = derived(currentNote, ($note) => $note?.path ?? null);
+
+// Helper to convert Note to PluginNote
+function toPluginNote(note: Note): PluginNote {
+  return {
+    path: note.path,
+    title: note.title,
+    content: note.content,
+    wordCount: note.word_count,
+    tags: note.tags
+  };
+}
 
 // Actions
 
@@ -25,6 +38,9 @@ export async function openNote(path: string): Promise<void> {
   // Load backlinks
   const links = await api.getBacklinks(path);
   backlinks.set(links);
+  
+  // Notify plugins
+  pluginEvents.emitNoteOpen(toPluginNote(note));
 }
 
 export async function createNote(title: string): Promise<string> {
@@ -43,6 +59,9 @@ export async function saveCurrentNote(): Promise<void> {
     await api.saveNote(current.path, current.content);
     isDirty.set(false);
     await refreshNotes();
+    
+    // Notify plugins
+    pluginEvents.emitNoteSave(toPluginNote(current));
   } finally {
     isSaving.set(false);
   }
@@ -54,6 +73,9 @@ export function updateContent(content: string): void {
     isDirty.set(true);
     return { ...note, content };
   });
+  
+  // Notify plugins
+  pluginEvents.emitNoteChange(content);
 }
 
 export async function deleteCurrentNote(): Promise<void> {
@@ -71,6 +93,9 @@ export function closeNote(): void {
   currentNote.set(null);
   backlinks.set([]);
   isDirty.set(false);
+  
+  // Notify plugins
+  pluginEvents.emitNoteClose();
 }
 
 export async function reloadCurrentNote(): Promise<void> {
