@@ -4,7 +4,7 @@ use git2::{
     Cred, FetchOptions, MergeOptions, PushOptions,
     RemoteCallbacks, Repository, Signature, StatusOptions,
 };
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use thiserror::Error;
 
 use super::status::SyncStatus;
@@ -27,17 +27,13 @@ pub enum GitError {
 /// Git repository wrapper for Chronicle sync operations
 pub struct GitRepo {
     repo: Repository,
-    path: PathBuf,
 }
 
 impl GitRepo {
     /// Open existing repository at path
     pub fn open(path: &Path) -> Result<Self, GitError> {
         let repo = Repository::open(path)?;
-        Ok(Self {
-            repo,
-            path: path.to_path_buf(),
-        })
+        Ok(Self { repo })
     }
 
     /// Initialize new repository at path
@@ -53,10 +49,7 @@ impl GitRepo {
             repo.commit(Some("HEAD"), &sig, &sig, "Initial commit", &tree, &[])?;
         }
         
-        Ok(Self {
-            repo,
-            path: path.to_path_buf(),
-        })
+        Ok(Self { repo })
     }
 
     /// Check if path is a git repository
