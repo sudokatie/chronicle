@@ -157,6 +157,52 @@ Click "Graph" in the sidebar to visualize your knowledge network:
 - **Drag** to pan
 - **Click a node** to open that note
 
+### Plugins
+
+Chronicle supports plugins to extend functionality. Three built-in plugins ship with the app:
+
+**Word Count** - Shows word count, character count, and estimated reading time in the status bar.
+
+**Pomodoro Timer** - A sidebar panel with a configurable work/break timer for focused writing sessions.
+
+**Daily Notes** - Adds a command to quickly open or create today's note with a template.
+
+#### Managing Plugins
+
+Open Settings (`Cmd/Ctrl + ,`) and scroll to the Plugins section to:
+- Enable/disable plugins
+- Configure plugin settings
+- View plugin permissions
+
+#### Plugin Settings
+
+Each plugin can have its own settings:
+
+| Plugin | Setting | Default |
+|--------|---------|---------|
+| Word Count | Show character count | Yes |
+| Word Count | Show reading time | Yes |
+| Word Count | Words per minute | 200 |
+| Pomodoro | Work duration | 25 min |
+| Pomodoro | Break duration | 5 min |
+| Pomodoro | Long break duration | 15 min |
+| Pomodoro | Sessions before long break | 4 |
+| Daily Notes | Template | `# {{date}}` + tasks/notes |
+| Daily Notes | Date format | YYYY-MM-DD |
+| Daily Notes | Folder | `daily` |
+
+#### Plugin API
+
+Plugins can:
+- React to note events (open, change, save, close)
+- Add sidebar panels
+- Add status bar items
+- Register commands with keyboard shortcuts
+- Store persistent data
+- Access plugin settings
+
+For plugin development documentation, see [PLUGINS.md](docs/PLUGINS.md).
+
 ## Architecture
 
 - **Frontend**: SvelteKit + TailwindCSS + CodeMirror 6 + D3.js
