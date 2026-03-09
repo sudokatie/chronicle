@@ -57,6 +57,8 @@ pub struct AppConfig {
     pub graph: GraphConfig,
     #[serde(default)]
     pub ui: UiConfig,
+    #[serde(default)]
+    pub daily_notes: DailyNotesConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -102,6 +104,25 @@ pub struct UiConfig {
     pub show_tags: bool,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DailyNotesConfig {
+    /// Folder for daily notes (relative to vault root)
+    #[serde(default = "default_daily_folder")]
+    pub folder: String,
+    /// Date format for note filenames (strftime format)
+    #[serde(default = "default_date_format")]
+    pub date_format: String,
+    /// Template for new daily notes
+    #[serde(default = "default_daily_template")]
+    pub template: String,
+    /// Include link to previous day
+    #[serde(default = "default_true")]
+    pub link_previous_day: bool,
+    /// Include link to next day
+    #[serde(default = "default_true")]
+    pub link_next_day: bool,
+}
+
 // Default value functions
 fn default_font_family() -> String { "JetBrains Mono".to_string() }
 fn default_font_size() -> u32 { 14 }
@@ -112,6 +133,21 @@ fn default_charge_strength() -> i32 { -300 }
 fn default_node_size() -> u32 { 8 }
 fn default_sidebar_width() -> u32 { 250 }
 fn default_panel_width() -> u32 { 250 }
+fn default_daily_folder() -> String { "daily".to_string() }
+fn default_date_format() -> String { "%Y-%m-%d".to_string() }
+fn default_daily_template() -> String {
+    r#"# {{date}}
+
+[[{{previous_date}}|← Previous]] | [[{{next_date}}|Next →]]
+
+## Tasks
+
+- [ ] 
+
+## Notes
+
+"#.to_string()
+}
 
 impl Default for EditorConfig {
     fn default() -> Self {
@@ -143,6 +179,18 @@ impl Default for UiConfig {
             panel_width: default_panel_width(),
             show_backlinks: true,
             show_tags: true,
+        }
+    }
+}
+
+impl Default for DailyNotesConfig {
+    fn default() -> Self {
+        Self {
+            folder: default_daily_folder(),
+            date_format: default_date_format(),
+            template: default_daily_template(),
+            link_previous_day: true,
+            link_next_day: true,
         }
     }
 }

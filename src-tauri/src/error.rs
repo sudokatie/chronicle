@@ -31,6 +31,12 @@ pub enum ChronicleError {
 
     #[error("Lock failed")]
     LockFailed,
+
+    #[error("Invalid date format: {0}")]
+    InvalidDate(String),
+
+    #[error("Invalid direction: {0} (use 'prev' or 'next')")]
+    InvalidDirection(String),
 }
 
 // Make error serializable for Tauri

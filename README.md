@@ -12,6 +12,7 @@ Personal knowledge graph that grows as you write. Your second brain, visualized.
 - **Backlinks Panel** - See what links to your current note
 - **Knowledge Graph** - D3-powered force-directed visualization
 - **Full-Text Search** - Fast SQLite FTS5 search across all notes
+- **Daily Notes** - Quick journal with customizable templates and navigation
 - **Git Sync** - Sync your vault across devices with git
 - **File-Based Storage** - Plain Markdown files, git-friendly
 - **Keyboard Shortcuts** - Efficient workflow with Cmd/Ctrl shortcuts
@@ -146,6 +147,53 @@ Chronicle can sync your vault across devices using git. Click "Set up sync" in t
 - Chronicle uses libgit2 for git operations
 - Local changes are automatically staged and committed on sync
 - Conflicts are detected during pull and presented for resolution
+
+### Daily Notes
+
+Chronicle includes a daily journaling system that creates notes for each day automatically.
+
+**Quick Access**
+- Click the calendar icon in the sidebar to open today's note
+- Use arrow buttons to navigate to previous/next day
+- Notes are created automatically from your template
+
+**Template Variables**
+
+The daily note template supports these variables:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `{{date}}` | Full date | 2026-03-09 |
+| `{{year}}` | Year | 2026 |
+| `{{month}}` | Month (2-digit) | 03 |
+| `{{day}}` | Day (2-digit) | 09 |
+| `{{weekday}}` | Day of week | Sun |
+| `{{previous_date}}` | Previous day | 2026-03-08 |
+| `{{next_date}}` | Next day | 2026-03-10 |
+
+**Configuration**
+
+Configure daily notes in Settings:
+
+```toml
+[daily_notes]
+folder = "daily"              # Folder for daily notes
+date_format = "%Y-%m-%d"      # Date format for filenames
+link_previous_day = true      # Include link to previous day
+link_next_day = true          # Include link to next day
+template = """
+# {{date}}
+
+[[{{previous_date}}|← Previous]] | [[{{next_date}}|Next →]]
+
+## Tasks
+
+- [ ] 
+
+## Notes
+
+"""
+```
 
 ### Graph View
 

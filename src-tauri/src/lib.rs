@@ -42,6 +42,13 @@ pub fn run() {
             commands::sync_pull,
             commands::sync_get_conflict,
             commands::sync_resolve_conflict,
+            // Daily notes commands
+            commands::get_or_create_today,
+            commands::get_or_create_daily_note,
+            commands::navigate_daily_note,
+            commands::list_daily_notes,
+            commands::get_daily_note_path,
+            commands::daily_note_exists,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
