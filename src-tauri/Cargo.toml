@@ -36,6 +36,7 @@ toml = "0.8"
 dirs = "5.0"
 git2 = "0.18"
 chrono = { version = "0.4", features = ["serde"] }
+pulldown-cmark = "0.10"
 
 [dev-dependencies]
 tempfile = "3.10"
